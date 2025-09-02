@@ -1,8 +1,9 @@
 const { Client, LocalAuth } = require("whatsapp-web.js");
 const qrcode = require("qrcode-terminal");
 
-// Importa as configurações do novo arquivo
+// Importa as configurações e o conteúdo do novo arquivo
 const config = require("./config.js");
+const content = require("./content.js");
 
 // Inicializa o cliente
 const client = new Client({
@@ -24,23 +25,15 @@ client.on("ready", () => {
 client.on("message", async (msg) => {
   const chatId = msg.from;
 
-  // Reiniciar fluxo em qualquer etapa
   if (msg.body.trim() === "0") {
     sessions[chatId] = { stage: 0, data: {} };
-    await client.sendMessage(
-      chatId,
-      `🔄 Fluxo reiniciado!\n\n👋 Olá! Bem-vindo ao *CHATBOT DA HORA GAMES*! \n\nQual é o seu *nome*?`
-    );
+    await client.sendMessage(chatId, content.saudacao.reiniciado);
     return;
   }
 
-  // Se não existir sessão, cria
   if (!sessions[chatId]) {
     sessions[chatId] = { stage: 0, data: {} };
-    await client.sendMessage(
-      chatId,
-      `👋 Olá! Bem-vindo ao *CHATBOT DA HORA GAMES*! \n\nQual é o seu *nome*?`
-    );
+    await client.sendMessage(chatId, content.saudacao.inicio);
     return;
   }
 
@@ -50,35 +43,26 @@ client.on("message", async (msg) => {
     case 0:
       session.data.nome = msg.body.trim();
       session.stage = 1;
-      await client.sendMessage(
-        chatId,
-        `✅ Obrigado, ${session.data.nome}!\n\n📧 Agora, informe o seu *email*:\n(Se quiser reiniciar, digite 0️⃣)`
-      );
+      await client.sendMessage(chatId, content.pedidos.nome(session.data.nome));
       break;
 
     case 1:
       session.data.email = msg.body.trim();
       session.stage = 2;
-      await client.sendMessage(
-        chatId,
-        `🏠 Informe o seu *endereço*:\n(Se quiser reiniciar, digite 0️⃣)`
-      );
+      await client.sendMessage(chatId, content.pedidos.email);
       break;
 
     case 2:
       session.data.endereco = msg.body.trim();
       session.stage = 3;
-      await client.sendMessage(
-        chatId,
-        `🎮 Qual o modelo do seu Xbox?\n\n1️⃣ Fat\n2️⃣ Slim\n3️⃣ Super Slim\n\n(Se quiser reiniciar, digite 0️⃣)`
-      );
+      await client.sendMessage(chatId, content.pedidos.endereco);
       break;
 
     case 3:
       if (!["1", "2", "3"].includes(msg.body.trim())) {
         await client.sendMessage(
           chatId,
-          `❌ Opção inválida. Escolha:\n1️⃣ Fat\n2️⃣ Slim\n3️⃣ Super Slim`
+          `${content.erros.opcaoInvalida}\n1️⃣ Fat\n2️⃣ Slim\n3️⃣ Super Slim`
         );
         return;
       }
@@ -89,50 +73,32 @@ client.on("message", async (msg) => {
           ? "Slim"
           : "Super Slim";
       session.stage = 4;
-      await client.sendMessage(
-        chatId,
-        `📅 Informe o *ano* do console [2007 - 2015]:\n(Se quiser reiniciar, digite 0️⃣)`
-      );
+      await client.sendMessage(chatId, content.pedidos.ano);
       break;
 
     case 4:
       const ano = parseInt(msg.body.trim());
       if (isNaN(ano) || ano < 2007 || ano > 2015) {
-        await client.sendMessage(
-          chatId,
-          `❌ Ano inválido. Digite entre 2007 e 2015`
-        );
+        await client.sendMessage(chatId, content.erros.anoInvalido);
         return;
       }
       session.data.ano = ano;
 
       if (ano === 2015) {
         session.stage = 41;
-        await client.sendMessage(
-          chatId,
-          `⚠️ Aparelhos de *2015 não podem ser desbloqueados definitivamente*.\nDeseja continuar?\n1️⃣ Sim\n2️⃣ Não\n(Se quiser reiniciar, digite 0️⃣)`
-        );
+        await client.sendMessage(chatId, content.pedidos.avisoAno2015);
       } else {
         session.stage = 5;
-        await client.sendMessage(
-          chatId,
-          `💾 Possui armazenamento?\n1️⃣ HD interno\n2️⃣ HD externo\n3️⃣ Pendrive 16GB+\n4️⃣ Não tenho\n(Se quiser reiniciar, digite 0️⃣)`
-        );
+        await client.sendMessage(chatId, content.pedidos.armazenamento);
       }
       break;
 
     case 41:
       if (msg.body.trim() === "1") {
         session.stage = 5;
-        await client.sendMessage(
-          chatId,
-          `💾 Possui armazenamento?\n1️⃣ HD interno\n2️⃣ HD externo\n3️⃣ Pendrive 16GB+\n4️⃣ Não tenho\n(Se quiser reiniciar, digite 0️⃣)`
-        );
+        await client.sendMessage(chatId, content.pedidos.armazenamento);
       } else {
-        await client.sendMessage(
-          chatId,
-          `🚫 Atendimento finalizado. Obrigado! 🙏`
-        );
+        await client.sendMessage(chatId, content.saudacao.finalizado);
         delete sessions[chatId];
       }
       break;
@@ -141,7 +107,7 @@ client.on("message", async (msg) => {
       if (!["1", "2", "3", "4"].includes(msg.body.trim())) {
         await client.sendMessage(
           chatId,
-          `❌ Opção inválida. Escolha:\n1️⃣ HD interno\n2️⃣ HD externo\n3️⃣ Pendrive 16GB+\n4️⃣ Não tenho`
+          `${content.erros.opcaoInvalida}\n1️⃣ HD interno\n2️⃣ HD externo\n3️⃣ Pendrive 16GB+\n4️⃣ Não tenho`
         );
         return;
       }
@@ -149,10 +115,7 @@ client.on("message", async (msg) => {
       if (msg.body.trim() === "4") {
         session.data.armazenamento = "Não possui";
         session.stage = 51;
-        await client.sendMessage(
-          chatId,
-          `⚠️ Sem armazenamento não será possível jogar nem copiar jogos.\nDeseja:\n1️⃣ Continuar apenas com desbloqueio\n2️⃣ Finalizar\n(Se quiser reiniciar, digite 0️⃣)`
-        );
+        await client.sendMessage(chatId, content.pedidos.avisoSemArmazenamento);
         return;
       }
 
@@ -164,7 +127,6 @@ client.on("message", async (msg) => {
           : "Pendrive 16GB+";
       session.stage = 6;
 
-      // Monta a mensagem com os jogos do arquivo de configuração
       let listaJogos = "";
       for (const key in config.jogos) {
         listaJogos += `${key}️⃣ ${config.jogos[key]}\n`;
@@ -179,29 +141,19 @@ client.on("message", async (msg) => {
       if (msg.body.trim() === "1") {
         session.data.tipoServico = "Somente desbloqueio";
         session.stage = 7;
-        await client.sendMessage(
-          chatId,
-          `📍 Deseja receber o link da localização?\n1️⃣ Sim\n2️⃣ Não\n(Se quiser reiniciar, digite 0️⃣)`
-        );
+        await client.sendMessage(chatId, content.pedidos.localizacao);
       } else {
-        await client.sendMessage(
-          chatId,
-          `🚫 Atendimento finalizado. Obrigado! 🙏`
-        );
+        await client.sendMessage(chatId, content.saudacao.finalizado);
         delete sessions[chatId];
       }
       break;
 
     case 6:
-      // Pega a lista de jogos do arquivo de configuração
       const jogosOpcoes = config.jogos;
       let numerosEscolhidos = msg.body.split(",").map((n) => n.trim());
 
       if (numerosEscolhidos.length === 0 || numerosEscolhidos.length > 3) {
-        await client.sendMessage(
-          chatId,
-          `❌ Escolha no mínimo 1 e no máximo 3 jogos. Exemplo: 1,2,3`
-        );
+        await client.sendMessage(chatId, content.erros.jogosInvalidos);
         return;
       }
 
@@ -209,7 +161,7 @@ client.on("message", async (msg) => {
       if (!todosValidos) {
         await client.sendMessage(
           chatId,
-          `❌ Por favor, escolha apenas números de jogos válidos. Opções: ${Object.keys(
+          `${content.erros.jogosNumerosInvalidos} Opções: ${Object.keys(
             jogosOpcoes
           ).join(", ")}.`
         );
@@ -220,18 +172,12 @@ client.on("message", async (msg) => {
 
       session.data.jogos = jogosSelecionados;
       session.stage = 7;
-      await client.sendMessage(
-        chatId,
-        `📍 Deseja receber o link da localização?\n1️⃣ Sim\n2️⃣ Não\n(Se quiser reiniciar, digite 0️⃣)`
-      );
+      await client.sendMessage(chatId, content.pedidos.localizacao);
       break;
 
     case 7:
       if (!["1", "2"].includes(msg.body.trim())) {
-        await client.sendMessage(
-          chatId,
-          `❌ Opção inválida. Responda:\n1️⃣ Sim\n2️⃣ Não`
-        );
+        await client.sendMessage(chatId, content.erros.simNaoInvalido);
         return;
       }
 
@@ -250,7 +196,6 @@ client.on("message", async (msg) => {
       }
       session.data.tipoServico = tipoServico;
 
-      // Montar resumo
       let resumo =
         `📋 *Resumo do Pedido*:\n\n` +
         `👤 Nome: ${session.data.nome}\n` +
@@ -271,7 +216,6 @@ client.on("message", async (msg) => {
       await client.sendMessage(chatId, resumo);
 
       if (msg.body.trim() === "1") {
-        // Usa a localização do arquivo de configuração
         await client.sendMessage(
           chatId,
           `📍 Localização: ${config.localizacao}`
@@ -280,9 +224,8 @@ client.on("message", async (msg) => {
 
       await client.sendMessage(
         chatId,
-        `✅ Atendimento concluído! Obrigado ${session.data.nome}, até breve! 🙏\n\nSe quiser reiniciar, digite 0️⃣`
+        content.pedidos.concluido(session.data.nome)
       );
-
       delete sessions[chatId];
       break;
   }
