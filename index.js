@@ -138,7 +138,7 @@ client.on("message", async (message) => {
       } else {
         session.step = 7;
         await message.reply(
-          "🎮 Escolha até *3 jogos* da lista (separe por vírgula):\nGTA, NFS, FIFA 19, PES 2018"
+          "🎮 Escolha até *3 jogos* (digite números separados por vírgula):\n1️⃣ GTA\n2️⃣ NFS\n3️⃣ FIFA 19\n4️⃣ PES 2018"
         );
       }
       break;
@@ -163,17 +163,20 @@ client.on("message", async (message) => {
       break;
 
     case 7:
-      const jogos = text
-        .split(",")
-        .map((j) => j.trim())
-        .filter((j) => ["GTA", "NFS", "FIFA 19", "PES 2018"].includes(j));
+      const mapJogos = { 1: "GTA", 2: "NFS", 3: "FIFA 19", 4: "PES 2018" };
+      const numeros = text.split(",").map((n) => n.trim());
+      const jogos = numeros
+        .map((n) => mapJogos[n])
+        .filter((j) => j !== undefined)
+        .slice(0, 3); // Limitar a 3 jogos
 
       if (jogos.length === 0) {
         await message.reply(
-          "❌ Nenhum jogo válido selecionado. Escolha até 3 jogos da lista."
+          "❌ Nenhum jogo válido selecionado. Escolha até 3 jogos da lista usando números separados por vírgula."
         );
         return;
       }
+
       session.data.jogos = jogos;
       session.step = 8;
       await message.reply(
