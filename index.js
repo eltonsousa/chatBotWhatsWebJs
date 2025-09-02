@@ -35,7 +35,6 @@ client.on("message", async (message) => {
   const session = sessions[user];
 
   switch (session.step) {
-    // [1] Nome → Email
     case 1:
       if (text.length < 2) {
         await message.reply("❌ Nome inválido. Digite seu nome completo.");
@@ -68,7 +67,6 @@ client.on("message", async (message) => {
       );
       break;
 
-    // [4] Modelo
     case 4:
       if (!["1", "2", "3"].includes(text)) {
         await message.reply("❌ Opção inválida. Digite 1, 2 ou 3.");
@@ -80,7 +78,6 @@ client.on("message", async (message) => {
       await message.reply("📅 Informe o *ano do console* [2007 - 2015]:");
       break;
 
-    // [5] Ano
     case 5:
       if (!isValidNumber(text, 2007, 2015)) {
         await message.reply(
@@ -120,7 +117,6 @@ client.on("message", async (message) => {
       );
       break;
 
-    // [6] Armazenamento
     case 6:
       if (!["1", "2", "3", "4"].includes(text)) {
         await message.reply("❌ Opção inválida. Digite 1, 2, 3 ou 4.");
@@ -159,14 +155,13 @@ client.on("message", async (message) => {
         delete sessions[user];
         return;
       }
-      // Se escolher continuar, pular etapa de jogos
+      // Continuar desbloqueio, pular etapa de jogos
       session.step = 8;
       await message.reply(
         "📍 Deseja receber o link da localização?\n1️⃣ Sim\n2️⃣ Não"
       );
       break;
 
-    // [7] Jogos
     case 7:
       const jogos = text
         .split(",")
@@ -186,7 +181,6 @@ client.on("message", async (message) => {
       );
       break;
 
-    // [8] Localização → Resumo
     case 8:
       if (!["1", "2"].includes(text)) {
         await message.reply("❌ Opção inválida. Digite 1 ou 2.");
@@ -194,6 +188,7 @@ client.on("message", async (message) => {
       }
       session.data.localizacao = text === "1" ? "Sim" : "Não";
 
+      // Montar resumo
       let resumo = `📋 *Resumo do seu pedido:*\n\n`;
       resumo += `👤 Nome: ${session.data.nome}\n`;
       resumo += `📧 Email: ${session.data.email}\n`;
@@ -205,6 +200,26 @@ client.on("message", async (message) => {
         resumo += `🕹 Jogos:\n`;
         session.data.jogos.forEach((jogo) => (resumo += `- ${jogo}\n`));
       }
+
+      // Tipo de Serviço
+      let tipoServico = "";
+      if (
+        session.data.ano === "2015" &&
+        session.data.armazenamento !== "Não tenho"
+      ) {
+        tipoServico = "Copiar jogos";
+      } else if (
+        session.data.ano !== "2015" &&
+        session.data.armazenamento === "Não tenho"
+      ) {
+        tipoServico = "Somente desbloqueio";
+      } else if (
+        session.data.ano !== "2015" &&
+        session.data.armazenamento !== "Não tenho"
+      ) {
+        tipoServico = "Desbloqueio+jogos";
+      }
+      resumo += `🛠 Tipo de Serviço: ${tipoServico}\n`;
 
       await message.reply(resumo);
 
