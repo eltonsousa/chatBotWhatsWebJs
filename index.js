@@ -54,6 +54,14 @@ client.on("message", async (msg) => {
       break;
 
     case 1:
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(msg.body.trim())) {
+        await client.sendMessage(
+          chatId,
+          `❌ Formato de email inválido. Por favor, digite um email válido!\nEx.: seuemail@exemplo.com`
+        );
+        return;
+      }
       session.data.email = msg.body.trim();
       session.stage = 2;
       await client.sendMessage(
