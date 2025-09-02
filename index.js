@@ -185,17 +185,29 @@ client.on("message", async (msg) => {
 
     case 6:
       const jogosOpcoes = { 1: "GTA", 2: "NFS", 3: "FIFA 19", 4: "PES 2018" };
-      let escolhidos = msg.body.split(",").map((j) => j.trim());
-      let jogosSelecionados = escolhidos
-        .map((j) => jogosOpcoes[j])
-        .filter(Boolean);
-      if (jogosSelecionados.length === 0 || jogosSelecionados.length > 3) {
+      let numerosEscolhidos = msg.body.split(",").map((n) => n.trim());
+
+      // Passo 1: Verifica se a quantidade de jogos é válida (1 a 3)
+      if (numerosEscolhidos.length === 0 || numerosEscolhidos.length > 3) {
         await client.sendMessage(
           chatId,
-          `❌ Escolha até *3 jogos* válidos usando os números. Exemplo: 1,2,3`
+          `❌ Escolha no mínimo 1 e no máximo 3 jogos. Exemplo: 1,2,3`
         );
         return;
       }
+
+      // Passo 2: Verifica se CADA opção é um número de jogo válido
+      const todosValidos = numerosEscolhidos.every((n) => jogosOpcoes[n]);
+      if (!todosValidos) {
+        await client.sendMessage(
+          chatId,
+          `❌ Por favor, escolha apenas números de jogos válidos. Opções: 1, 2, 3, 4.`
+        );
+        return;
+      }
+
+      let jogosSelecionados = numerosEscolhidos.map((n) => jogosOpcoes[n]);
+
       session.data.jogos = jogosSelecionados;
       session.stage = 7;
       await client.sendMessage(
@@ -214,22 +226,21 @@ client.on("message", async (msg) => {
       }
 
       // Tipo de serviço
-      if (
-        session.data.ano === 2015 &&
-        session.data.armazenamento !== "Não possui"
-      ) {
-        session.data.tipoServico = "Copiar jogos";
-      } else if (
-        session.data.ano !== 2015 &&
-        session.data.armazenamento === "Não possui"
-      ) {
-        session.data.tipoServico = "Somente desbloqueio";
-      } else if (
-        session.data.ano !== 2015 &&
-        session.data.armazenamento !== "Não possui"
-      ) {
-        session.data.tipoServico = "Desbloqueio + jogos";
+      // LÓGICA OTIMIZADA APLICADA AQUI
+      let tipoServico;
+      const ano_data = session.data.ano;
+      const armazenamento = session.data.armazenamento;
+
+      if (ano_data === 2015 && armazenamento !== "Não possui") {
+        tipoServico = "Copiar jogos";
+      } else if (ano_data !== 2015 && armazenamento === "Não possui") {
+        tipoServico = "Somente desbloqueio";
+      } else if (ano_data !== 2015 && armazenamento !== "Não possui") {
+        tipoServico = "Desbloqueio + jogos";
+      } else {
+        tipoServico = "Serviço não definido";
       }
+      session.data.tipoServico = tipoServico;
 
       // Montar resumo
       let resumo =
