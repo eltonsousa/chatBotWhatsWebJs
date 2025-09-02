@@ -1,241 +1,269 @@
-// index.js
 const { Client, LocalAuth } = require("whatsapp-web.js");
 const qrcode = require("qrcode-terminal");
 
+// Inicializa o cliente
 const client = new Client({
   authStrategy: new LocalAuth(),
-  puppeteer: { headless: false },
+  puppeteer: { headless: true }, // pode colocar false para ver o navegador
 });
 
-client.on("qr", (qr) => qrcode.generate(qr, { small: true }));
-client.on("ready", () => console.log("🤖 CHATBOT DA HORA GAMES online!"));
+// Armazena o estado das conversas
+let sessions = {};
 
-const sessions = {};
-function initSession(user) {
-  sessions[user] = { step: 1, data: {} };
-}
+client.on("qr", (qr) => {
+  qrcode.generate(qr, { small: true });
+});
 
-function isValidNumber(input, min, max) {
-  const n = parseInt(input);
-  return !isNaN(n) && n >= min && n <= max;
-}
+client.on("ready", () => {
+  console.log("🤖 CHATBOT DA HORA GAMES está online!");
+});
 
-client.on("message", async (message) => {
-  const user = message.from;
-  const text = message.body.trim();
+client.on("message", async (msg) => {
+  const chatId = msg.from;
 
-  if (!sessions[user]) {
-    initSession(user);
-    await message.reply(
-      "👋 Olá! Bem-vindo ao *CHATBOT DA HORA GAMES* 🎮\n\nQual é o seu *nome*?"
+  // Reiniciar fluxo em qualquer etapa
+  if (msg.body.trim() === "0") {
+    sessions[chatId] = { stage: 0, data: {} };
+    await client.sendMessage(
+      chatId,
+      `🔄 Fluxo reiniciado!\n\n👋 Olá! Bem-vindo ao *CHATBOT DA HORA GAMES*! \n\nQual é o seu *nome*?`
     );
     return;
   }
 
-  const session = sessions[user];
+  // Se não existir sessão, cria
+  if (!sessions[chatId]) {
+    sessions[chatId] = { stage: 0, data: {} };
+    await client.sendMessage(
+      chatId,
+      `👋 Olá! Bem-vindo ao *CHATBOT DA HORA GAMES*! \n\nQual é o seu *nome*?`
+    );
+    return;
+  }
 
-  switch (session.step) {
+  const session = sessions[chatId];
+
+  switch (session.stage) {
+    case 0:
+      session.data.nome = msg.body.trim();
+      session.stage = 1;
+      await client.sendMessage(
+        chatId,
+        `✅ Obrigado, ${session.data.nome}!\n\n📧 Agora, informe o seu *email*:\n(Se quiser reiniciar, digite 0️⃣)`
+      );
+      break;
+
     case 1:
-      if (text.length < 2) {
-        await message.reply("❌ Nome inválido. Digite seu nome completo.");
-        return;
-      }
-      session.data.nome = text;
-      session.step = 2;
-      await message.reply("📧 Agora, por favor informe o seu *email*:");
+      session.data.email = msg.body.trim();
+      session.stage = 2;
+      await client.sendMessage(
+        chatId,
+        `🏠 Informe o seu *endereço*:\n(Se quiser reiniciar, digite 0️⃣)`
+      );
       break;
 
     case 2:
-      if (!text.includes("@") || !text.includes(".")) {
-        await message.reply("❌ Email inválido. Digite um email válido:");
-        return;
-      }
-      session.data.email = text;
-      session.step = 3;
-      await message.reply("🏠 Informe o seu *endereço*:");
+      session.data.endereco = msg.body.trim();
+      session.stage = 3;
+      await client.sendMessage(
+        chatId,
+        `🎮 Qual o modelo do seu Xbox?\n\n1️⃣ Fat\n2️⃣ Slim\n3️⃣ Super Slim\n\n(Se quiser reiniciar, digite 0️⃣)`
+      );
       break;
 
     case 3:
-      if (text.length < 5) {
-        await message.reply("❌ Endereço inválido. Digite novamente:");
+      if (!["1", "2", "3"].includes(msg.body.trim())) {
+        await client.sendMessage(
+          chatId,
+          `❌ Opção inválida. Escolha:\n1️⃣ Fat\n2️⃣ Slim\n3️⃣ Super Slim`
+        );
         return;
       }
-      session.data.endereco = text;
-      session.step = 4;
-      await message.reply(
-        "💻 Qual o modelo do seu Xbox?\n1️⃣ Fat\n2️⃣ Slim\n3️⃣ Super Slim\nDigite o número da opção:"
+      session.data.modelo =
+        msg.body.trim() === "1"
+          ? "Fat"
+          : msg.body.trim() === "2"
+          ? "Slim"
+          : "Super Slim";
+      session.stage = 4;
+      await client.sendMessage(
+        chatId,
+        `📅 Informe o *ano* do console [2007 - 2015]:\n(Se quiser reiniciar, digite 0️⃣)`
       );
       break;
 
     case 4:
-      if (!["1", "2", "3"].includes(text)) {
-        await message.reply("❌ Opção inválida. Digite 1, 2 ou 3.");
+      const ano = parseInt(msg.body.trim());
+      if (isNaN(ano) || ano < 2007 || ano > 2015) {
+        await client.sendMessage(
+          chatId,
+          `❌ Ano inválido. Digite entre 2007 e 2015`
+        );
         return;
       }
-      const mapModelo = { 1: "Fat", 2: "Slim", 3: "Super Slim" };
-      session.data.modelo = mapModelo[text];
-      session.step = 5;
-      await message.reply("📅 Informe o *ano do console* [2007 - 2015]:");
+      session.data.ano = ano;
+
+      if (ano === 2015) {
+        session.stage = 41;
+        await client.sendMessage(
+          chatId,
+          `⚠️ Aparelhos de *2015 não podem ser desbloqueados definitivamente*.\nDeseja continuar?\n1️⃣ Sim\n2️⃣ Não\n(Se quiser reiniciar, digite 0️⃣)`
+        );
+      } else {
+        session.stage = 5;
+        await client.sendMessage(
+          chatId,
+          `💾 Possui armazenamento?\n1️⃣ HD interno\n2️⃣ HD externo\n3️⃣ Pendrive 16GB+\n4️⃣ Não tenho\n(Se quiser reiniciar, digite 0️⃣)`
+        );
+      }
+      break;
+
+    case 41:
+      if (msg.body.trim() === "1") {
+        session.stage = 5;
+        await client.sendMessage(
+          chatId,
+          `💾 Possui armazenamento?\n1️⃣ HD interno\n2️⃣ HD externo\n3️⃣ Pendrive 16GB+\n4️⃣ Não tenho\n(Se quiser reiniciar, digite 0️⃣)`
+        );
+      } else {
+        await client.sendMessage(
+          chatId,
+          `🚫 Atendimento finalizado. Obrigado! 🙏`
+        );
+        delete sessions[chatId];
+      }
       break;
 
     case 5:
-      if (!isValidNumber(text, 2007, 2015)) {
-        await message.reply(
-          "❌ Ano inválido. Digite um ano entre 2007 e 2015:"
+      if (!["1", "2", "3", "4"].includes(msg.body.trim())) {
+        await client.sendMessage(
+          chatId,
+          `❌ Opção inválida. Escolha:\n1️⃣ HD interno\n2️⃣ HD externo\n3️⃣ Pendrive 16GB+\n4️⃣ Não tenho`
         );
         return;
       }
-      session.data.ano = text;
-      if (text === "2015") {
-        session.step = 5.1;
-        await message.reply(
-          "⚠️ Esse modelo não pode ser desbloqueado definitivamente.\nDeseja continuar?\n1️⃣ Sim\n2️⃣ Não"
-        );
-      } else {
-        session.step = 6;
-        await message.reply(
-          "💾 Possui armazenamento?\n1️⃣ HD Interno\n2️⃣ HD Externo\n3️⃣ Pendrive 16GB+\n4️⃣ Não tenho"
-        );
-      }
-      break;
 
-    case 5.1:
-      if (!["1", "2"].includes(text)) {
-        await message.reply("❌ Opção inválida. Digite 1 (Sim) ou 2 (Não).");
-        return;
-      }
-      if (text === "2") {
-        await message.reply(
-          "❌ Processo encerrado. Obrigado por entrar em contato!"
+      if (msg.body.trim() === "4") {
+        session.data.armazenamento = "Não possui";
+        session.stage = 51;
+        await client.sendMessage(
+          chatId,
+          `⚠️ Sem armazenamento não será possível jogar nem copiar jogos.\nDeseja:\n1️⃣ Continuar apenas com desbloqueio\n2️⃣ Finalizar\n(Se quiser reiniciar, digite 0️⃣)`
         );
-        delete sessions[user];
         return;
       }
-      session.step = 6;
-      await message.reply(
-        "💾 Possui armazenamento?\n1️⃣ HD Interno\n2️⃣ HD Externo\n3️⃣ Pendrive 16GB+\n4️⃣ Não tenho"
+
+      session.data.armazenamento =
+        msg.body.trim() === "1"
+          ? "HD interno"
+          : msg.body.trim() === "2"
+          ? "HD externo"
+          : "Pendrive 16GB+";
+      session.stage = 6;
+      await client.sendMessage(
+        chatId,
+        `🎮 Escolha até *3 jogos* (digite os números separados por vírgula):\n1️⃣ GTA\n2️⃣ NFS\n3️⃣ FIFA 19\n4️⃣ PES 2018\n(Se quiser reiniciar, digite 0️⃣)`
       );
       break;
 
-    case 6:
-      if (!["1", "2", "3", "4"].includes(text)) {
-        await message.reply("❌ Opção inválida. Digite 1, 2, 3 ou 4.");
-        return;
-      }
-      const mapArmazenamento = {
-        1: "HD Interno",
-        2: "HD Externo",
-        3: "Pendrive 16GB+",
-        4: "Não tenho",
-      };
-      session.data.armazenamento = mapArmazenamento[text];
-
-      if (text === "4") {
-        session.step = 6.1;
-        await message.reply(
-          "⚠️ Sem armazenamento não será possível jogar nem copiar jogos.\nDeseja continuar desbloqueio ou finalizar?\n1️⃣ Continuar\n2️⃣ Finalizar"
+    case 51:
+      if (msg.body.trim() === "1") {
+        session.data.tipoServico = "Somente desbloqueio";
+        session.stage = 7;
+        await client.sendMessage(
+          chatId,
+          `📍 Deseja receber o link da localização?\n1️⃣ Sim\n2️⃣ Não\n(Se quiser reiniciar, digite 0️⃣)`
         );
       } else {
-        session.step = 7;
-        await message.reply(
-          "🎮 Escolha até *3 jogos* (digite números separados por vírgula):\n1️⃣ GTA\n2️⃣ NFS\n3️⃣ FIFA 19\n4️⃣ PES 2018"
+        await client.sendMessage(
+          chatId,
+          `🚫 Atendimento finalizado. Obrigado! 🙏`
         );
+        delete sessions[chatId];
       }
       break;
 
-    case 6.1:
-      if (!["1", "2"].includes(text)) {
-        await message.reply("❌ Opção inválida. Digite 1 ou 2.");
-        return;
-      }
-      if (text === "2") {
-        await message.reply(
-          "❌ Processo encerrado. Obrigado por entrar em contato!"
+    case 6:
+      const jogosOpcoes = { 1: "GTA", 2: "NFS", 3: "FIFA 19", 4: "PES 2018" };
+      let escolhidos = msg.body.split(",").map((j) => j.trim());
+      let jogosSelecionados = escolhidos
+        .map((j) => jogosOpcoes[j])
+        .filter(Boolean);
+      if (jogosSelecionados.length === 0 || jogosSelecionados.length > 3) {
+        await client.sendMessage(
+          chatId,
+          `❌ Escolha até *3 jogos* válidos usando os números. Exemplo: 1,2,3`
         );
-        delete sessions[user];
         return;
       }
-      // Continuar desbloqueio, pular etapa de jogos
-      session.step = 8;
-      await message.reply(
-        "📍 Deseja receber o link da localização?\n1️⃣ Sim\n2️⃣ Não"
+      session.data.jogos = jogosSelecionados;
+      session.stage = 7;
+      await client.sendMessage(
+        chatId,
+        `📍 Deseja receber o link da localização?\n1️⃣ Sim\n2️⃣ Não\n(Se quiser reiniciar, digite 0️⃣)`
       );
       break;
 
     case 7:
-      const mapJogos = { 1: "GTA", 2: "NFS", 3: "FIFA 19", 4: "PES 2018" };
-      const numeros = text.split(",").map((n) => n.trim());
-      const jogos = numeros
-        .map((n) => mapJogos[n])
-        .filter((j) => j !== undefined)
-        .slice(0, 3); // Limitar a 3 jogos
-
-      if (jogos.length === 0) {
-        await message.reply(
-          "❌ Nenhum jogo válido selecionado. Escolha até 3 jogos da lista usando números separados por vírgula."
+      if (!["1", "2"].includes(msg.body.trim())) {
+        await client.sendMessage(
+          chatId,
+          `❌ Opção inválida. Responda:\n1️⃣ Sim\n2️⃣ Não`
         );
         return;
       }
 
-      session.data.jogos = jogos;
-      session.step = 8;
-      await message.reply(
-        "📍 Deseja receber o link da localização?\n1️⃣ Sim\n2️⃣ Não"
-      );
-      break;
-
-    case 8:
-      if (!["1", "2"].includes(text)) {
-        await message.reply("❌ Opção inválida. Digite 1 ou 2.");
-        return;
+      // Tipo de serviço
+      if (
+        session.data.ano === 2015 &&
+        session.data.armazenamento !== "Não possui"
+      ) {
+        session.data.tipoServico = "Copiar jogos";
+      } else if (
+        session.data.ano !== 2015 &&
+        session.data.armazenamento === "Não possui"
+      ) {
+        session.data.tipoServico = "Somente desbloqueio";
+      } else if (
+        session.data.ano !== 2015 &&
+        session.data.armazenamento !== "Não possui"
+      ) {
+        session.data.tipoServico = "Desbloqueio + jogos";
       }
-      session.data.localizacao = text === "1" ? "Sim" : "Não";
 
       // Montar resumo
-      let resumo = `📋 *Resumo do seu pedido:*\n\n`;
-      resumo += `👤 Nome: ${session.data.nome}\n`;
-      resumo += `📧 Email: ${session.data.email}\n`;
-      resumo += `🏠 Endereço: ${session.data.endereco}\n`;
-      resumo += `🎮 Modelo Xbox: ${session.data.modelo}\n`;
-      resumo += `📅 Ano: ${session.data.ano}\n`;
-      resumo += `💾 Armazenamento: ${session.data.armazenamento}\n`;
+      let resumo =
+        `📋 *Resumo do Pedido*:\n\n` +
+        `👤 Nome: ${session.data.nome}\n` +
+        `📧 Email: ${session.data.email}\n` +
+        `🏠 Endereço: ${session.data.endereco}\n` +
+        `🎮 Modelo: ${session.data.modelo}\n` +
+        `📅 Ano: ${session.data.ano}\n` +
+        `💾 Armazenamento: ${session.data.armazenamento}\n` +
+        `🛠️ Tipo de Serviço: ${session.data.tipoServico}\n`;
+
       if (session.data.jogos) {
-        resumo += `🕹 Jogos:\n`;
-        session.data.jogos.forEach((jogo) => (resumo += `- ${jogo}\n`));
+        resumo += `🎮 Jogos:\n`;
+        session.data.jogos.forEach((jogo, index) => {
+          resumo += `${index + 1}️⃣ ${jogo}\n`;
+        });
       }
 
-      // Tipo de Serviço
-      let tipoServico = "";
-      if (
-        session.data.ano === "2015" &&
-        session.data.armazenamento !== "Não tenho"
-      ) {
-        tipoServico = "Copiar jogos";
-      } else if (
-        session.data.ano !== "2015" &&
-        session.data.armazenamento === "Não tenho"
-      ) {
-        tipoServico = "Somente desbloqueio";
-      } else if (
-        session.data.ano !== "2015" &&
-        session.data.armazenamento !== "Não tenho"
-      ) {
-        tipoServico = "Desbloqueio+jogos";
-      }
-      resumo += `🛠 Tipo de Serviço: ${tipoServico}\n`;
+      await client.sendMessage(chatId, resumo);
 
-      await message.reply(resumo);
-
-      if (session.data.localizacao === "Sim") {
-        await message.reply(
-          "🌍 Link da localização: https://goo.gl/maps/xxxxx"
+      if (msg.body.trim() === "1") {
+        await client.sendMessage(
+          chatId,
+          `📍 Localização: https://maps.google.com`
         );
       }
 
-      await message.reply(
-        "✅ Obrigado por usar o *CHATBOT DA HORA GAMES*! Até mais! 👋"
+      await client.sendMessage(
+        chatId,
+        `✅ Atendimento concluído! Obrigado ${session.data.nome}, até breve! 🙏\n\nSe quiser reiniciar, digite 0️⃣`
       );
-      delete sessions[user];
+
+      delete sessions[chatId];
       break;
   }
 });
