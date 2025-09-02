@@ -47,6 +47,14 @@ client.on("message", async (msg) => {
       break;
 
     case 1:
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(msg.body.trim())) {
+        await client.sendMessage(
+          chatId,
+          `❌ Formato de email inválido. Por favor, digite um email válido.`
+        );
+        return;
+      }
       session.data.email = msg.body.trim();
       session.stage = 2;
       await client.sendMessage(chatId, content.pedidos.email);
@@ -152,6 +160,7 @@ client.on("message", async (msg) => {
       const jogosOpcoes = config.jogos;
       let numerosEscolhidos = msg.body.split(",").map((n) => n.trim());
 
+      // escolha a quantidade de Jogos
       if (numerosEscolhidos.length === 0 || numerosEscolhidos.length > 3) {
         await client.sendMessage(chatId, content.erros.jogosInvalidos);
         return;
