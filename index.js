@@ -205,15 +205,16 @@ client.on("message", async (msg) => {
       }
       session.data.tipoServico = tipoServico;
 
-      let resumo =
-        `📋 *Resumo do Pedido*:\n\n` +
-        `👤 Nome: ${session.data.nome}\n` +
-        `📧 Email: ${session.data.email}\n` +
-        `🏠 Endereço: ${session.data.endereco}\n` +
-        `🎮 Modelo: ${session.data.modelo}\n` +
-        `📅 Ano: ${session.data.ano}\n` +
-        `💾 Armazenamento: ${session.data.armazenamento}\n` +
-        `🛠️ Tipo de Serviço: ${session.data.tipoServico}\n`;
+      // template literal
+      let resumo = `
+_*Resumo do Pedido*:_
+👤 Nome: ${session.data.nome}
+📧 Email: ${session.data.email}
+🏠 Endereço: ${session.data.endereco}
+🎮 Modelo: ${session.data.modelo}
+📅 Ano: ${session.data.ano}
+💾 Armazenamento: ${session.data.armazenamento}
+🛠️ Serviço: ${session.data.tipoServico}\n`;
 
       if (session.data.jogos) {
         resumo += `🎮 Jogos:\n`;
