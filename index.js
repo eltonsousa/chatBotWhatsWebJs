@@ -1,10 +1,13 @@
 const { Client, LocalAuth } = require("whatsapp-web.js");
 const qrcode = require("qrcode-terminal");
 
+// Importa as configurações do novo arquivo
+const config = require("./config.js");
+
 // Inicializa o cliente
 const client = new Client({
   authStrategy: new LocalAuth(),
-  puppeteer: { headless: true }, // pode colocar false para ver o navegador
+  puppeteer: { headless: true },
 });
 
 // Armazena o estado das conversas
@@ -54,14 +57,6 @@ client.on("message", async (msg) => {
       break;
 
     case 1:
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(msg.body.trim())) {
-        await client.sendMessage(
-          chatId,
-          `❌ Formato de email inválido. Por favor, digite um email válido!\nEx.: seuemail@exemplo.com`
-        );
-        return;
-      }
       session.data.email = msg.body.trim();
       session.stage = 2;
       await client.sendMessage(
@@ -168,9 +163,15 @@ client.on("message", async (msg) => {
           ? "HD externo"
           : "Pendrive 16GB+";
       session.stage = 6;
+
+      // Monta a mensagem com os jogos do arquivo de configuração
+      let listaJogos = "";
+      for (const key in config.jogos) {
+        listaJogos += `${key}️⃣ ${config.jogos[key]}\n`;
+      }
       await client.sendMessage(
         chatId,
-        `🎮 Escolha até *3 jogos* (digite os números separados por vírgula):\n1️⃣ GTA\n2️⃣ NFS\n3️⃣ FIFA 19\n4️⃣ PES 2018\n(Se quiser reiniciar, digite 0️⃣)`
+        `🎮 Escolha até *3 jogos* (digite os números separados por vírgula):\n${listaJogos}(Se quiser reiniciar, digite 0️⃣)`
       );
       break;
 
@@ -192,10 +193,10 @@ client.on("message", async (msg) => {
       break;
 
     case 6:
-      const jogosOpcoes = { 1: "GTA", 2: "NFS", 3: "FIFA 19", 4: "PES 2018" };
+      // Pega a lista de jogos do arquivo de configuração
+      const jogosOpcoes = config.jogos;
       let numerosEscolhidos = msg.body.split(",").map((n) => n.trim());
 
-      // Passo 1: Verifica se a quantidade de jogos é válida (1 a 3)
       if (numerosEscolhidos.length === 0 || numerosEscolhidos.length > 3) {
         await client.sendMessage(
           chatId,
@@ -204,12 +205,13 @@ client.on("message", async (msg) => {
         return;
       }
 
-      // Passo 2: Verifica se CADA opção é um número de jogo válido
       const todosValidos = numerosEscolhidos.every((n) => jogosOpcoes[n]);
       if (!todosValidos) {
         await client.sendMessage(
           chatId,
-          `❌ Por favor, escolha apenas números de jogos válidos. Opções: 1, 2, 3, 4.`
+          `❌ Por favor, escolha apenas números de jogos válidos. Opções: ${Object.keys(
+            jogosOpcoes
+          ).join(", ")}.`
         );
         return;
       }
@@ -233,8 +235,6 @@ client.on("message", async (msg) => {
         return;
       }
 
-      // Tipo de serviço
-      // LÓGICA OTIMIZADA APLICADA AQUI
       let tipoServico;
       const ano_data = session.data.ano;
       const armazenamento = session.data.armazenamento;
@@ -271,9 +271,10 @@ client.on("message", async (msg) => {
       await client.sendMessage(chatId, resumo);
 
       if (msg.body.trim() === "1") {
+        // Usa a localização do arquivo de configuração
         await client.sendMessage(
           chatId,
-          `📍 Localização: https://maps.google.com`
+          `📍 Localização: ${config.localizacao}`
         );
       }
 
