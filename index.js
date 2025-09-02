@@ -2,45 +2,28 @@
 const { Client, LocalAuth } = require("whatsapp-web.js");
 const qrcode = require("qrcode-terminal");
 
-// Criar cliente com autenticação local
 const client = new Client({
   authStrategy: new LocalAuth(),
-  puppeteer: {
-    headless: false,
-    args: [
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--disable-dev-shm-usage",
-      "--disable-accelerated-2d-canvas",
-      "--no-first-run",
-      "--no-zygote",
-      "--disable-gpu",
-    ],
-  },
+  puppeteer: { headless: false },
 });
 
-// Mostrar QR Code
 client.on("qr", (qr) => qrcode.generate(qr, { small: true }));
 client.on("ready", () => console.log("🤖 CHATBOT DA HORA GAMES online!"));
 
-// Sessões para armazenar dados dos usuários
 const sessions = {};
 function initSession(user) {
   sessions[user] = { step: 1, data: {} };
 }
 
-// Validação de números
 function isValidNumber(input, min, max) {
   const n = parseInt(input);
   return !isNaN(n) && n >= min && n <= max;
 }
 
-// Fluxo de mensagens
 client.on("message", async (message) => {
   const user = message.from;
   const text = message.body.trim();
 
-  // Criar sessão se não existir
   if (!sessions[user]) {
     initSession(user);
     await message.reply(
@@ -81,7 +64,7 @@ client.on("message", async (message) => {
       session.data.endereco = text;
       session.step = 4;
       await message.reply(
-        "💻 Qual o modelo do seu *Xbox*?\n\n1️⃣ Fat\n2️⃣ Slim\n3️⃣ Super Slim"
+        "💻 Qual o modelo do seu Xbox?\n1️⃣ Fat\n2️⃣ Slim\n3️⃣ Super Slim\nDigite o número da opção:"
       );
       break;
 
@@ -109,7 +92,7 @@ client.on("message", async (message) => {
       if (text === "2015") {
         session.step = 5.1;
         await message.reply(
-          "⚠️ Esse modelo não pode ser desbloqueado definitivamente.\nDeseja continuar mesmo assim?\n1️⃣ Sim\n2️⃣ Não"
+          "⚠️ Esse modelo não pode ser desbloqueado definitivamente.\nDeseja continuar?\n1️⃣ Sim\n2️⃣ Não"
         );
       } else {
         session.step = 6;
@@ -152,16 +135,35 @@ client.on("message", async (message) => {
       session.data.armazenamento = mapArmazenamento[text];
 
       if (text === "4") {
-        session.step = 8;
+        session.step = 6.1;
         await message.reply(
-          "⚠️ Sem armazenamento não será possível jogar nem copiar jogos.\n\n📍 Deseja receber o link da localização?\n1️⃣ Sim\n2️⃣ Não"
+          "⚠️ Sem armazenamento não será possível jogar nem copiar jogos.\nDeseja continuar desbloqueio ou finalizar?\n1️⃣ Continuar\n2️⃣ Finalizar"
         );
       } else {
         session.step = 7;
         await message.reply(
-          "🎮 Escolha até *3 jogos* da lista (separe por vírgula):\n- GTA\n- NFS\n- FIFA 19\n- PES 2018"
+          "🎮 Escolha até *3 jogos* da lista (separe por vírgula):\nGTA, NFS, FIFA 19, PES 2018"
         );
       }
+      break;
+
+    case 6.1:
+      if (!["1", "2"].includes(text)) {
+        await message.reply("❌ Opção inválida. Digite 1 ou 2.");
+        return;
+      }
+      if (text === "2") {
+        await message.reply(
+          "❌ Processo encerrado. Obrigado por entrar em contato!"
+        );
+        delete sessions[user];
+        return;
+      }
+      // Se escolher continuar, pular etapa de jogos
+      session.step = 8;
+      await message.reply(
+        "📍 Deseja receber o link da localização?\n1️⃣ Sim\n2️⃣ Não"
+      );
       break;
 
     // [7] Jogos
@@ -187,12 +189,11 @@ client.on("message", async (message) => {
     // [8] Localização → Resumo
     case 8:
       if (!["1", "2"].includes(text)) {
-        await message.reply("❌ Opção inválida! Digite 1 (Sim) ou 2 (Não).");
+        await message.reply("❌ Opção inválida. Digite 1 ou 2.");
         return;
       }
       session.data.localizacao = text === "1" ? "Sim" : "Não";
 
-      // Montar resumo
       let resumo = `📋 *Resumo do seu pedido:*\n\n`;
       resumo += `👤 Nome: ${session.data.nome}\n`;
       resumo += `📧 Email: ${session.data.email}\n`;
@@ -216,10 +217,9 @@ client.on("message", async (message) => {
       await message.reply(
         "✅ Obrigado por usar o *CHATBOT DA HORA GAMES*! Até mais! 👋"
       );
-      delete sessions[user]; // encerra fluxo
+      delete sessions[user];
       break;
   }
 });
 
-// Inicializa o cliente
 client.initialize();
