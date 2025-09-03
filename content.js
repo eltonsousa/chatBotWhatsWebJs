@@ -10,20 +10,20 @@ module.exports = {
   },
   pedidos: {
     nome: (nome) =>
-      `✅ Obrigado, ${nome}!\n\n📧 Agora, informe o seu *email*:\n(Se quiser reiniciar, digite 0️⃣ ou encerrar, digite 9️⃣)`,
+      `✅ Obrigado, ${nome}!\n\n📧 Agora, informe o seu *email*:\n\n_(digite 0️⃣ para reiniciar, ou 9️⃣ para encerrar)_`,
     email:
-      "🏠 Informe o seu *endereço*:\n(Se quiser reiniciar, digite 0️⃣ ou encerrar, digite 9️⃣)",
+      "🏠 Informe o seu *endereço*:\n\n_(digite 0️⃣ para reiniciar, ou 9️⃣ para encerrar)_",
     endereco:
-      "🎮 Qual o modelo do seu Xbox?\n\n1️⃣ Fat\n2️⃣ Slim\n3️⃣ Super Slim\n\n(Se quiser reiniciar, digite 0️⃣ ou encerrar, digite 9️⃣)",
-    ano: "📅 Informe o *ano* do console [2007 - 2015]:\n(Se quiser reiniciar, digite 0️⃣ ou encerrar, digite 9️⃣)",
+      "🎮 Qual o modelo do seu Xbox?\n\n1️⃣ Fat\n2️⃣ Slim\n3️⃣ Super Slim\n\n_(digite 0️⃣ para reiniciar, ou 9️⃣ para encerrar)_",
+    ano: "📅 Informe o *ano* do console [2007 - 2015]:\n\n_(digite 0️⃣ para reiniciar, ou 9️⃣ para encerrar)_",
     armazenamento:
-      "💾 Possui armazenamento?\n1️⃣ HD interno\n2️⃣ HD externo\n3️⃣ Pendrive 16GB+\n4️⃣ Não tenho\n(Se quiser reiniciar, digite 0️⃣ ou encerrar, digite 9️⃣)",
+      "💾 Possui armazenamento?\n\n1️⃣ HD interno\n2️⃣ HD externo\n3️⃣ Pendrive 16GB+\n4️⃣ Não tenho\n\n_(digite 0️⃣ para reiniciar, ou 9️⃣ para encerrar)_",
     localizacao:
-      "📍 Deseja receber o link da nossa localização?\n1️⃣ Sim\n2️⃣ Não\n(Se quiser reiniciar, digite 0️⃣ ou encerrar, digite 9️⃣)",
+      "📍 Deseja receber o link da nossa localização?\n\n1️⃣ Sim\n2️⃣ Não\n\n_(digite 0️⃣ para reiniciar, ou 9️⃣ para encerrar)_",
     concluido: (nome) =>
-      `✅ Atendimento concluído! Obrigado, ${nome}, até breve! 🙏\n\n(Se quiser reiniciar, digite 0️⃣)`,
-    avisoAno2015: `⚠️ Aparelhos de *2015 não podem ser desbloqueados definitivamente!*.\nDeseja continuar?\n1️⃣ Sim\n2️⃣ Não\n(Se quiser reiniciar, digite 0️⃣ ou encerrar, digite 9️⃣)`,
-    avisoSemArmazenamento: `⚠️ Sem armazenamento não será possível jogar nem copiar jogos!\nO que você deseja:\n1️⃣ Continuar apenas com desbloqueio\n2️⃣ Finalizar\n(Se quiser reiniciar, digite 0️⃣ ou encerrar, digite 9️⃣)`,
+      `✅ Atendimento concluído! Obrigado, ${nome}, até breve! 🙏`,
+    avisoAno2015: `⚠️ Aparelhos de *2015 não podem ser desbloqueados definitivamente!*.\n\nDeseja continuar?\n\n1️⃣ Sim\n2️⃣ Não\n\n_(digite 0️⃣ para reiniciar, ou 9️⃣ para encerrar)_`,
+    avisoSemArmazenamento: `⚠️ Sem armazenamento não será possível jogar nem copiar jogos!\n\nO que você deseja:\n\n1️⃣ Continuar apenas com desbloqueio\n2️⃣ Finalizar\n\n_(digite 0️⃣ para reiniciar, ou 9️⃣ para encerrar)_`,
   },
   erros: {
     emailInvalido:
@@ -31,10 +31,10 @@ module.exports = {
     opcaoInvalida: (opcoes) => `❌ Opção inválida. Escolha:\n${opcoes}`,
     anoInvalido: "❌ Ano inválido. Digite entre 2007 e 2015",
     jogosInvalidos:
-      "❌ Escolha no mínimo 1 e no máximo 3 jogos. Exemplo: 1,2,3",
+      "❌ Escolha no mínimo 1 e no máximo 15 jogos. Exemplo: 1,2,3",
     jogosNumerosInvalidos:
       "❌ Por favor, escolha apenas números de jogos válidos. Opções: ",
-    simNaoInvalido: "❌ Opção inválida. Responda:\n1️⃣ Sim\n2️⃣ Não",
+    simNaoInvalido: "❌ Opção inválida. Responda:\n\n1️⃣ Sim\n2️⃣ Não",
   },
   opcoes: {
     modelo: "1️⃣ Fat\n2️⃣ Slim\n3️⃣ Super Slim",

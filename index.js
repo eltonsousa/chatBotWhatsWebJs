@@ -149,11 +149,11 @@ client.on("message", async (msg) => {
 
       let listaJogos = "";
       for (const key in config.jogos) {
-        listaJogos += `${key}️⃣ ${config.jogos[key]}\n`;
+        listaJogos += `${key}. ${config.jogos[key]}\n\n`;
       }
       await client.sendMessage(
         chatId,
-        `🎮 Escolha até *3 jogos* (digite os números separados por vírgula):\n${listaJogos}(Se quiser reiniciar, digite 0️⃣ ou encerrar, digite 9️⃣)`
+        `🎮 Escolha até *15 jogos* (digite os números separados por vírgula):\n\n${listaJogos}(Se quiser reiniciar, digite 0️⃣ ou encerrar, digite 9️⃣)`
       );
       break;
 
@@ -172,7 +172,7 @@ client.on("message", async (msg) => {
       const jogosOpcoes = config.jogos;
       let numerosEscolhidos = msg.body.split(",").map((n) => n.trim());
 
-      if (numerosEscolhidos.length === 0 || numerosEscolhidos.length > 3) {
+      if (numerosEscolhidos.length === 0 || numerosEscolhidos.length > 15) {
         await client.sendMessage(chatId, content.erros.jogosInvalidos);
         return;
       }
@@ -229,7 +229,7 @@ client.on("message", async (msg) => {
       if (session.data.jogos) {
         resumo += `\n🎮 Jogos:`;
         session.data.jogos.forEach((jogo, index) => {
-          resumo += `\n${index + 1}️⃣ ${jogo}`;
+          resumo += `\n${index + 1}. ${jogo}`;
         });
       }
 
