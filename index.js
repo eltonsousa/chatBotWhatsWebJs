@@ -1,9 +1,16 @@
 const { Client, LocalAuth } = require("whatsapp-web.js");
 const qrcode = require("qrcode-terminal");
+const { createClient } = require("@supabase/supabase-js");
+require("dotenv").config();
 
 // Importa as configurações e o conteúdo do novo arquivo
 const config = require("./config.js");
 const content = require("./content.js");
+
+// Configura o cliente Supabase usando as variáveis de ambiente
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Inicializa o cliente
 const client = new Client({
@@ -234,6 +241,27 @@ client.on("message", async (msg) => {
           `📍 Localização: ${config.localizacao}`
         );
       }
+
+      // 💾 LÓGICA PARA SALVAR OS DADOS NO SUPABASE 💾
+      const { data, error } = await supabase.from("pedidos").insert([
+        {
+          nome: session.data.nome,
+          email: session.data.email,
+          endereco: session.data.endereco,
+          modelo: session.data.modelo,
+          ano: session.data.ano,
+          armazenamento: session.data.armazenamento,
+          tipoServico: session.data.tipoServico,
+          jogos: session.data.jogos,
+        },
+      ]);
+
+      if (error) {
+        console.error("Erro ao salvar os dados no Supabase:", error);
+      } else {
+        console.log("Dados do pedido salvos com sucesso:", data);
+      }
+      // FIM DA LÓGICA DO SUPABASE
 
       await client.sendMessage(
         chatId,
