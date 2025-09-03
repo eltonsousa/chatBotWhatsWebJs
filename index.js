@@ -49,10 +49,7 @@ client.on("message", async (msg) => {
     case 1:
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(msg.body.trim())) {
-        await client.sendMessage(
-          chatId,
-          `❌ Formato de email inválido. Por favor, digite um email válido.`
-        );
+        await client.sendMessage(chatId, content.erros.emailInvalido);
         return;
       }
       session.data.email = msg.body.trim();
@@ -70,7 +67,7 @@ client.on("message", async (msg) => {
       if (!["1", "2", "3"].includes(msg.body.trim())) {
         await client.sendMessage(
           chatId,
-          `${content.erros.opcaoInvalida}\n1️⃣ Fat\n2️⃣ Slim\n3️⃣ Super Slim`
+          content.erros.opcaoInvalida(content.opcoes.modelo)
         );
         return;
       }
@@ -115,7 +112,7 @@ client.on("message", async (msg) => {
       if (!["1", "2", "3", "4"].includes(msg.body.trim())) {
         await client.sendMessage(
           chatId,
-          `${content.erros.opcaoInvalida}\n1️⃣ HD interno\n2️⃣ HD externo\n3️⃣ Pendrive 16GB+\n4️⃣ Não tenho`
+          content.erros.opcaoInvalida(content.opcoes.armazenamento)
         );
         return;
       }
@@ -160,7 +157,6 @@ client.on("message", async (msg) => {
       const jogosOpcoes = config.jogos;
       let numerosEscolhidos = msg.body.split(",").map((n) => n.trim());
 
-      // escolha a quantidade de Jogos
       if (numerosEscolhidos.length === 0 || numerosEscolhidos.length > 3) {
         await client.sendMessage(chatId, content.erros.jogosInvalidos);
         return;
@@ -170,7 +166,7 @@ client.on("message", async (msg) => {
       if (!todosValidos) {
         await client.sendMessage(
           chatId,
-          `${content.erros.jogosNumerosInvalidos} Opções: ${Object.keys(
+          `${content.erros.jogosNumerosInvalidos} ${Object.keys(
             jogosOpcoes
           ).join(", ")}.`
         );
@@ -205,21 +201,20 @@ client.on("message", async (msg) => {
       }
       session.data.tipoServico = tipoServico;
 
-      // template literal
       let resumo = `
-_*Resumo do Pedido*:_
+*📋 Resumo do Pedido:*
 👤 Nome: ${session.data.nome}
 📧 Email: ${session.data.email}
 🏠 Endereço: ${session.data.endereco}
 🎮 Modelo: ${session.data.modelo}
 📅 Ano: ${session.data.ano}
 💾 Armazenamento: ${session.data.armazenamento}
-🛠️ Serviço: ${session.data.tipoServico}\n`;
+🛠️ Serviço: ${session.data.tipoServico}`;
 
       if (session.data.jogos) {
-        resumo += `🎮 Jogos:\n`;
+        resumo += `\n🎮 Jogos:`;
         session.data.jogos.forEach((jogo, index) => {
-          resumo += `${index + 1}️⃣ ${jogo}\n`;
+          resumo += `\n${index + 1}️⃣ ${jogo}`;
         });
       }
 

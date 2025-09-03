@@ -20,7 +20,7 @@ module.exports = {
       "📍 Deseja receber o link da nossa localização?\n1️⃣ Sim\n2️⃣ Não\n(Se quiser reiniciar, digite 0️⃣)",
     concluido: (nome) =>
       `✅ Atendimento concluído! Obrigado, ${nome}, até breve! 🙏\n\n(Se quiser reiniciar, digite 0️⃣)`,
-    avisoAno2015: `⚠️ Aparelhos de *2015 não podem ser desbloqueados definitivamente*.\nDeseja continuar?\n1️⃣ Sim\n2️⃣ Não\n(Se quiser reiniciar, digite 0️⃣)`,
+    avisoAno2015: `⚠️ Aparelhos de *2015 não podem ser desbloqueados definitivamente!*.\nDeseja continuar?\n1️⃣ Sim\n2️⃣ Não\n(Se quiser reiniciar, digite 0️⃣)`,
     avisoSemArmazenamento: `⚠️ Sem armazenamento não será possível jogar nem copiar jogos!\nO que você deseja:\n1️⃣ Continuar apenas com desbloqueio\n2️⃣ Finalizar\n(Se quiser reiniciar, digite 0️⃣)`,
   },
   erros: {
@@ -33,5 +33,10 @@ module.exports = {
     jogosNumerosInvalidos:
       "❌ Por favor, escolha apenas números de jogos válidos. Opções: ",
     simNaoInvalido: "❌ Opção inválida. Responda:\n1️⃣ Sim\n2️⃣ Não",
+  },
+  opcoes: {
+    modelo: "1️⃣ Fat\n2️⃣ Slim\n3️⃣ Super Slim",
+    armazenamento:
+      "1️⃣ HD interno\n2️⃣ HD externo\n3️⃣ Pendrive 16GB+\n4️⃣ Não tenho",
   },
 };
