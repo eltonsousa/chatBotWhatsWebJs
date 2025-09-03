@@ -25,9 +25,17 @@ client.on("ready", () => {
 client.on("message", async (msg) => {
   const chatId = msg.from;
 
+  // Opção para reiniciar
   if (msg.body.trim() === "0") {
     sessions[chatId] = { stage: 0, data: {} };
     await client.sendMessage(chatId, content.saudacao.reiniciado);
+    return;
+  }
+
+  // Opção para encerrar
+  if (msg.body.trim() === "9") {
+    await client.sendMessage(chatId, content.saudacao.encerrado);
+    delete sessions[chatId];
     return;
   }
 
@@ -138,7 +146,7 @@ client.on("message", async (msg) => {
       }
       await client.sendMessage(
         chatId,
-        `🎮 Escolha até *3 jogos* (digite os números separados por vírgula):\n${listaJogos}(Se quiser reiniciar, digite 0️⃣)`
+        `🎮 Escolha até *3 jogos* (digite os números separados por vírgula):\n${listaJogos}(Se quiser reiniciar, digite 0️⃣ ou encerrar, digite 9️⃣)`
       );
       break;
 
