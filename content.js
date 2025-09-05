@@ -4,7 +4,7 @@ module.exports = {
     inicio:
       "👋 Olá! Seja bem-vindo ao *CHATBOT DA HORA GAMES*! \n\nPara darmos início, me diga o seu *nome* e *sobrenome*?",
     reiniciado:
-      "🔄 Fluxo reiniciado!\n\n👋 Olá! Seja bem-vindo ao *CHATBOT DA HORA GAMES*! \n\nPara darmos início, me diga o seu *nome* e *sobrenome*?",
+      "🔄 Atendimento reiniciado. Vamos começar de novo? Por favor, me diga o seu *nome* e *sobrenome*?",
     finalizado: "🚫 Atendimento finalizado. Obrigado! 🙏",
     encerrado: "👋 Atendimento encerrado. Esperamos te ver em breve! 🙏",
   },
@@ -40,5 +40,9 @@ module.exports = {
     modelo: "1️⃣ Fat\n2️⃣ Slim\n3️⃣ Super Slim",
     armazenamento:
       "1️⃣ HD interno\n2️⃣ HD externo\n3️⃣ Pendrive 16GB+\n4️⃣ Não tenho",
+  },
+  pedidos: {
+    escolherJogos: (limitJogos) =>
+      `🎮 Escolha até *${limitJogos} jogos* (digite os números separados por vírgula):`,
   },
 };

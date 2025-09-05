@@ -184,12 +184,15 @@ client.on("message", async (msg) => {
       session.stage = 6;
 
       let listaJogos = "";
+      const limiteJogos = 15; // Define o limite de jogos aqui
       for (const key in config.jogos) {
         listaJogos += `${key}. ${config.jogos[key]}\n`;
       }
       await client.sendMessage(
         chatId,
-        `🎮 Escolha até *3 jogos* (digite os números separados por vírgula):\n${listaJogos}(Se quiser reiniciar, digite 0️⃣ ou encerrar, digite 9️⃣)`
+        `${content.pedidos.escolherJogos(
+          limiteJogos
+        )}\n${listaJogos}(Se quiser reiniciar, digite 0️⃣ ou encerrar, digite 9️⃣)`
       );
       break;
 
@@ -208,7 +211,7 @@ client.on("message", async (msg) => {
       const jogosOpcoes = config.jogos;
       let numerosEscolhidos = msg.body.split(",").map((n) => n.trim());
 
-      if (numerosEscolhidos.length === 0 || numerosEscolhidos.length > 3) {
+      if (numerosEscolhidos.length === 0 || numerosEscolhidos.length > 15) {
         await client.sendMessage(chatId, content.erros.jogosInvalidos);
         break;
       }
