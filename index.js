@@ -3,6 +3,23 @@ const qrcode = require("qrcode-terminal");
 const { createClient } = require("@supabase/supabase-js");
 require("dotenv").config();
 
+// Logs personalizados
+function logInfo(message, session) {
+  const nome = session?.data?.nome || "Usuário desconhecido";
+  const chatId = session?.chatId || "ChatId desconhecido";
+  console.log(`[${new Date().toISOString()}] [${chatId}] [${nome}] ${message}`);
+}
+
+function logError(message, error, session) {
+  const nome = session?.data?.nome || "Usuário desconhecido";
+  const chatId = session?.chatId || "ChatId desconhecido";
+  console.error(
+    `[${new Date().toISOString()}] [${chatId}] [${nome}] ${message}`,
+    error
+  );
+}
+// Logs personalizados
+
 // Importa as configurações e o conteúdo
 const config = require("./config.js");
 const content = require("./content.js");
@@ -22,9 +39,11 @@ client.on("qr", (qr) => {
   qrcode.generate(qr, { small: true });
 });
 
-client.on("ready", () => {
-  console.log("🤖 CHATBOT DA HORA GAMES está online!");
-});
+// client.on("ready", () => {
+//   console.log("🤖 CHATBOT DA HORA GAMES está online!");
+// });
+
+logInfo("🤖 CHATBOT está online!");
 
 client.on("message", async (msg) => {
   const chatId = msg.from;
@@ -37,9 +56,7 @@ client.on("message", async (msg) => {
     .single();
 
   if (selectError && selectError.code !== "PGRST116") {
-    // PGRST116 significa "nenhum dado encontrado", o que é normal.
-    // Qualquer outro erro é um problema.
-    console.error("Erro ao buscar a sessão:", selectError);
+    logError("Erro ao buscar a sessão", selectError);
     return;
   }
 
@@ -295,9 +312,9 @@ client.on("message", async (msg) => {
       ]);
 
       if (error) {
-        console.error("Erro ao salvar os dados no Supabase:", error);
+        logError("Erro ao salvar os dados no Supabase", error, session);
       } else {
-        console.log("Dados do pedido salvos com sucesso:", data);
+        logInfo("Dados do pedido salvos com sucesso", session);
       }
 
       // Deleta a sessão 'sessions' após o pedido finalizado
