@@ -1,3 +1,6 @@
+// Gera ID
+const { v4: uuidv4 } = require("uuid");
+
 const { Client, LocalAuth } = require("whatsapp-web.js");
 const qrcode = require("qrcode-terminal");
 const { createClient } = require("@supabase/supabase-js");
@@ -105,6 +108,9 @@ client.on("message", async (msg) => {
     await client.sendMessage(chatId, content.saudacao.inicio);
     return;
   }
+  //inserir ID
+  const serviceId = `OS-${Date.now()}`;
+  session.data.serviceId = serviceId;
 
   // O restante da sua lógica 'switch'
   switch (session.stage) {
@@ -272,6 +278,7 @@ client.on("message", async (msg) => {
       session.data.tipo_servico = tipo_servico;
 
       let resumo = `
+*🆔 ID do Serviço:* ${session.data.serviceId}
 *📋 Resumo do Pedido:*
 👤 Nome: ${session.data.nome}
 📧 Email: ${session.data.email}
@@ -300,6 +307,7 @@ client.on("message", async (msg) => {
       // 💾 LÓGICA PARA SALVAR OS DADOS NO SUPABASE 💾
       const { data, error } = await supabase.from("pedidos").insert([
         {
+          service_id: session.data.serviceId,
           nome: session.data.nome,
           email: session.data.email,
           endereco: session.data.endereco,
