@@ -3,7 +3,7 @@ const qrcode = require("qrcode-terminal");
 const { createClient } = require("@supabase/supabase-js");
 require("dotenv").config();
 
-// Importa as configurações e o conteúdo do novo arquivo
+// Importa as configurações e o conteúdo
 const config = require("./config.js");
 const content = require("./content.js");
 
@@ -12,14 +12,11 @@ const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Inicializa o cliente
+// Inicializa o cliente do WhatsApp
 const client = new Client({
   authStrategy: new LocalAuth(),
   puppeteer: { headless: true },
 });
-
-// Armazena o estado das conversas
-let sessions = {};
 
 client.on("qr", (qr) => {
   qrcode.generate(qr, { small: true });
@@ -32,28 +29,67 @@ client.on("ready", () => {
 client.on("message", async (msg) => {
   const chatId = msg.from;
 
-  // Opção para reiniciar
+  // Busca a sessão do usuário no Supabase
+  let { data: session, error: selectError } = await supabase
+    .from("sessions")
+    .select("*")
+    .eq("chatId", chatId)
+    .single();
+
+  if (selectError && selectError.code !== "PGRST116") {
+    // PGRST116 significa "nenhum dado encontrado", o que é normal.
+    // Qualquer outro erro é um problema.
+    console.error("Erro ao buscar a sessão:", selectError);
+    return;
+  }
+
+  // Se a mensagem for '0', reinicia a sessão
   if (msg.body.trim() === "0") {
-    sessions[chatId] = { stage: 0, data: {} };
+    if (session) {
+      await supabase.from("sessions").delete().eq("chatId", chatId);
+    }
     await client.sendMessage(chatId, content.saudacao.reiniciado);
     return;
   }
 
-  // Opção para encerrar
+  // Se a mensagem for '9', encerra a sessão
   if (msg.body.trim() === "9") {
+    if (session) {
+      await supabase.from("sessions").delete().eq("chatId", chatId);
+    }
     await client.sendMessage(chatId, content.saudacao.encerrado);
-    delete sessions[chatId];
     return;
   }
 
-  if (!sessions[chatId]) {
-    sessions[chatId] = { stage: 0, data: {} };
+  // Se a sessão não existir, cria uma nova no banco de dados
+  if (!session) {
+    const { error: insertError } = await supabase.from("sessions").insert([
+      {
+        chatId: chatId,
+        stage: 0,
+        data: {},
+      },
+    ]);
+    if (insertError) {
+      console.error("Erro ao criar nova sessão:", insertError);
+      return;
+    }
+    // Busca a nova sessão para continuar o fluxo
+    const { data: newSession, error: fetchError } = await supabase
+      .from("sessions")
+      .select("*")
+      .eq("chatId", chatId)
+      .single();
+    if (fetchError) {
+      console.error("Erro ao buscar a sessão recém-criada:", fetchError);
+      return;
+    }
+    session = newSession;
     await client.sendMessage(chatId, content.saudacao.inicio);
     return;
   }
 
-  const session = sessions[chatId];
-
+  // O restante da sua lógica 'switch'
   switch (session.stage) {
     case 0:
       session.data.nome = msg.body.trim();
@@ -65,7 +101,7 @@ client.on("message", async (msg) => {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(msg.body.trim())) {
         await client.sendMessage(chatId, content.erros.emailInvalido);
-        return;
+        break; // Use break para continuar na mesma etapa
       }
       session.data.email = msg.body.trim();
       session.stage = 2;
@@ -84,7 +120,7 @@ client.on("message", async (msg) => {
           chatId,
           content.erros.opcaoInvalida(content.opcoes.modelo)
         );
-        return;
+        break;
       }
       session.data.modelo =
         msg.body.trim() === "1"
@@ -100,7 +136,7 @@ client.on("message", async (msg) => {
       const ano = parseInt(msg.body.trim());
       if (isNaN(ano) || ano < 2007 || ano > 2015) {
         await client.sendMessage(chatId, content.erros.anoInvalido);
-        return;
+        break;
       }
       session.data.ano = ano;
 
@@ -119,7 +155,7 @@ client.on("message", async (msg) => {
         await client.sendMessage(chatId, content.pedidos.armazenamento);
       } else {
         await client.sendMessage(chatId, content.saudacao.finalizado);
-        delete sessions[chatId];
+        await supabase.from("sessions").delete().eq("chatId", chatId);
       }
       break;
 
@@ -129,14 +165,14 @@ client.on("message", async (msg) => {
           chatId,
           content.erros.opcaoInvalida(content.opcoes.armazenamento)
         );
-        return;
+        break;
       }
 
       if (msg.body.trim() === "4") {
         session.data.armazenamento = "Não possui";
         session.stage = 51;
         await client.sendMessage(chatId, content.pedidos.avisoSemArmazenamento);
-        return;
+        break;
       }
 
       session.data.armazenamento =
@@ -149,22 +185,22 @@ client.on("message", async (msg) => {
 
       let listaJogos = "";
       for (const key in config.jogos) {
-        listaJogos += `${key}. ${config.jogos[key]}\n\n`;
+        listaJogos += `${key}. ${config.jogos[key]}\n`;
       }
       await client.sendMessage(
         chatId,
-        `🎮 Escolha até *15 jogos* (digite os números separados por vírgula):\n\n${listaJogos}(Se quiser reiniciar, digite 0️⃣ ou encerrar, digite 9️⃣)`
+        `🎮 Escolha até *3 jogos* (digite os números separados por vírgula):\n${listaJogos}(Se quiser reiniciar, digite 0️⃣ ou encerrar, digite 9️⃣)`
       );
       break;
 
     case 51:
       if (msg.body.trim() === "1") {
-        session.data.tipoServico = "Somente desbloqueio";
+        session.data.tipo_servico = "Somente desbloqueio";
         session.stage = 7;
         await client.sendMessage(chatId, content.pedidos.localizacao);
       } else {
         await client.sendMessage(chatId, content.saudacao.finalizado);
-        delete sessions[chatId];
+        await supabase.from("sessions").delete().eq("chatId", chatId);
       }
       break;
 
@@ -172,9 +208,9 @@ client.on("message", async (msg) => {
       const jogosOpcoes = config.jogos;
       let numerosEscolhidos = msg.body.split(",").map((n) => n.trim());
 
-      if (numerosEscolhidos.length === 0 || numerosEscolhidos.length > 15) {
+      if (numerosEscolhidos.length === 0 || numerosEscolhidos.length > 3) {
         await client.sendMessage(chatId, content.erros.jogosInvalidos);
-        return;
+        break;
       }
 
       const todosValidos = numerosEscolhidos.every((n) => jogosOpcoes[n]);
@@ -185,11 +221,10 @@ client.on("message", async (msg) => {
             jogosOpcoes
           ).join(", ")}.`
         );
-        return;
+        break;
       }
 
       let jogosSelecionados = numerosEscolhidos.map((n) => jogosOpcoes[n]);
-
       session.data.jogos = jogosSelecionados;
       session.stage = 7;
       await client.sendMessage(chatId, content.pedidos.localizacao);
@@ -198,23 +233,23 @@ client.on("message", async (msg) => {
     case 7:
       if (!["1", "2"].includes(msg.body.trim())) {
         await client.sendMessage(chatId, content.erros.simNaoInvalido);
-        return;
+        break;
       }
 
-      let tipoServico;
       const ano_data = session.data.ano;
       const armazenamento = session.data.armazenamento;
+      let tipo_servico;
 
       if (ano_data === 2015 && armazenamento !== "Não possui") {
-        tipoServico = "Copiar jogos";
+        tipo_servico = "Copiar jogos";
       } else if (ano_data !== 2015 && armazenamento === "Não possui") {
-        tipoServico = "Somente desbloqueio";
+        tipo_servico = "Somente desbloqueio";
       } else if (ano_data !== 2015 && armazenamento !== "Não possui") {
-        tipoServico = "Desbloqueio + jogos";
+        tipo_servico = "Desbloqueio + jogos";
       } else {
-        tipoServico = "Serviço não definido";
+        tipo_servico = "Serviço não definido";
       }
-      session.data.tipoServico = tipoServico;
+      session.data.tipo_servico = tipo_servico;
 
       let resumo = `
 *📋 Resumo do Pedido:*
@@ -224,7 +259,7 @@ client.on("message", async (msg) => {
 🎮 Modelo: ${session.data.modelo}
 📅 Ano: ${session.data.ano}
 💾 Armazenamento: ${session.data.armazenamento}
-🛠️ Serviço: ${session.data.tipoServico}`;
+🛠️ Serviço: ${session.data.tipo_servico}`;
 
       if (session.data.jogos) {
         resumo += `\n🎮 Jogos:`;
@@ -251,7 +286,7 @@ client.on("message", async (msg) => {
           modelo: session.data.modelo,
           ano: session.data.ano,
           armazenamento: session.data.armazenamento,
-          tipoServico: session.data.tipoServico,
+          tipo_servico: session.data.tipo_servico,
           jogos: session.data.jogos,
         },
       ]);
@@ -261,14 +296,23 @@ client.on("message", async (msg) => {
       } else {
         console.log("Dados do pedido salvos com sucesso:", data);
       }
-      // FIM DA LÓGICA DO SUPABASE
 
+      // Deleta a sessão 'sessions' após o pedido finalizado
+      await supabase.from("sessions").delete().eq("chatId", chatId);
       await client.sendMessage(
         chatId,
         content.pedidos.concluido(session.data.nome)
       );
-      delete sessions[chatId];
       break;
+  }
+
+  // Atualiza o estado da sessão no banco de dados após cada etapa
+  const { error: updateError } = await supabase
+    .from("sessions")
+    .update(session)
+    .eq("chatId", chatId);
+  if (updateError) {
+    console.error("Erro ao atualizar a sessão:", updateError);
   }
 });
 
