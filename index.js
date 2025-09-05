@@ -190,9 +190,9 @@ client.on("message", async (msg) => {
       }
       await client.sendMessage(
         chatId,
-        `${content.pedidos.escolherJogos(
-          limiteJogos
-        )}\n${listaJogos}(Se quiser reiniciar, digite 0️⃣ ou encerrar, digite 9️⃣)`
+        `${content.pedidos.escolherJogos(limiteJogos)}\n${listaJogos}${
+          content.instrucoesReiniciarOuEncerrar
+        }`
       );
       break;
 
