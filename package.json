@@ -1,6 +1,6 @@
 {
-  "name": "chatbot-hora-games",
-  "version": "1.0.0",
+  "name": "chatbot-dahora-games",
+  "version": "0.0.9",
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
