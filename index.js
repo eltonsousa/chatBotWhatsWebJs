@@ -1,11 +1,11 @@
 ////////////////////////////////////////////////////////////////////////////////
+// index.js
+////////////////////////////////////////////////////////////////////////////////
 const express = require("express");
 const QRCode = require("qrcode");
-////////////////////////////////////////////////////////////////////////////////
 
 const { v4: uuidv4 } = require("uuid"); // Gera ID
 const { Client, LocalAuth } = require("whatsapp-web.js");
-const qrcode = require("qrcode-terminal");
 const { createClient } = require("@supabase/supabase-js");
 require("dotenv").config();
 
@@ -51,15 +51,6 @@ const supabaseKey = process.env.SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 ////////////////////////////////////////////////////////////////////////////////
-// Ler QR Code na web
-let latestQR = null;
-
-client.on("qr", (qr) => {
-  latestQR = qr;
-  console.log("⚡ Novo QR gerado. Acesse /qr para escanear.");
-});
-////////////////////////////////////////////////////////////////////////////////
-
 // Inicializa o cliente do WhatsApp
 const client = new Client({
   authStrategy: new LocalAuth(),
@@ -72,17 +63,24 @@ const client = new Client({
       "--disable-accelerated-2d-canvas",
       "--no-first-run",
       "--no-zygote",
-      "--single-process", // adiciona este
+      "--single-process",
       "--disable-gpu",
     ],
   },
 });
 
-client.on("qr", (qr) => {
-  qrcode.generate(qr, { small: true });
+// Log quando o bot estiver pronto
+client.on("ready", () => {
+  logInfo("🤖 CHATBOT está online!");
 });
 
-////////////////////////////////////////////////////////////////////////////////
+// Rota para exibir QR Code
+let latestQR = null;
+client.on("qr", (qr) => {
+  latestQR = qr;
+  console.log("⚡ Novo QR gerado. Acesse /qr para escanear.");
+});
+
 const app = express();
 
 app.get("/qr", async (req, res) => {
@@ -103,8 +101,7 @@ app.listen(process.env.PORT || 3000, () => {
 });
 ////////////////////////////////////////////////////////////////////////////////
 
-logInfo("🤖 CHATBOT está online!");
-
+// Fluxo de mensagens
 client.on("message", async (msg) => {
   const chatId = msg.from;
   const userMessage = msg.body.trim();
@@ -134,8 +131,8 @@ client.on("message", async (msg) => {
     if (session) {
       session.stage = 0;
       session.data = {}; // Limpa os dados da sessão anterior
-      const serviceId = `OS-${uuidv4().substring(0, 8).toUpperCase()}`; // reduz o ID para oito caracteres
-      session.data.serviceId = serviceId; // Gera um novo ID para o novo pedido
+      const serviceId = `OS-${uuidv4().substring(0, 8).toUpperCase()}`;
+      session.data.serviceId = serviceId; // Novo ID
       await supabase.from("sessions").update(session).eq("chatId", chatId);
       await sendWithTypingDelay(chatId, content.saudacao.reiniciado);
     } else {
