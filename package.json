@@ -1,11 +1,17 @@
 {
   "name": "chatbot-dahora-games",
-  "version": "0.0.9",
+  "version": "1.0.0",
+  "description": "Chatbot automatizado para WhatsApp integrado com Supabase, desenvolvido para Da Hora Games.",
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
     "start": "node index.js"
   },
+  "author": {
+    "name": "Elton Sousa",
+    "email": "eltonsousadesigner@gmail.com"
+  },
+  "license": "MIT",
   "dependencies": {
     "@supabase/supabase-js": "^2.39.7",
     "dotenv": "^16.4.5",
