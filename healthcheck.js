@@ -1,7 +1,7 @@
 // healthcheck.js
 const http = require("http");
 
-const port = process.env.PORT || 3000;
+const port = process.env.HEALTH_PORT || 8080;
 
 // cria um servidor simples que responde "OK"
 const server = http.createServer((req, res) => {

@@ -32,6 +32,7 @@ RUN apt-get update && apt-get install -y \
   libxss1 \
   libxtst6 \
   xdg-utils \
+  curl \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -41,8 +42,8 @@ RUN npm install --production
 
 COPY . .
 
-# Healthcheck nativo do Docker (Railway também reconhece)
+# Healthcheck separado na porta 8080
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-  CMD curl -f http://localhost:${PORT:-3000}/ || exit 1
+  CMD curl -f http://localhost:${HEALTH_PORT:-8080}/ || exit 1
 
 CMD ["npm", "start"]
