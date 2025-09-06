@@ -49,6 +49,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 const client = new Client({
   authStrategy: new LocalAuth(),
   puppeteer: { headless: true },
+  args: ["--no-sandbox"],
 });
 
 client.on("qr", (qr) => {
