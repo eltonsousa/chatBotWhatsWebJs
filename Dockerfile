@@ -1,8 +1,7 @@
 FROM node:20-slim
 
-# Instala apenas o essencial para o Chromium
+# Instala pacotes essenciais pro Chromium
 RUN apt-get update && apt-get install -y \
-  wget \
   fonts-liberation \
   libasound2 \
   libatk-bridge2.0-0 \
@@ -35,15 +34,15 @@ RUN apt-get update && apt-get install -y \
   xdg-utils \
   && rm -rf /var/lib/apt/lists/*
 
-# Define o diretório de trabalho
 WORKDIR /app
 
-# Copia package.json e instala dependências
 COPY package.json package-lock.json* ./
 RUN npm install --production
 
-# Copia o restante do código
 COPY . .
 
-# Inicia a aplicação
+# Healthcheck nativo do Docker (Railway também reconhece)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD curl -f http://localhost:${PORT:-3000}/ || exit 1
+
 CMD ["npm", "start"]
