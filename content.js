@@ -10,6 +10,9 @@ module.exports = {
       "🔄 Fluxo reiniciado! \n\n👋 Olá! Seja bem-vindo ao *CHATBOT DA HORA GAMES*! \n\nPara darmos início, me diga o seu *nome* e *sobrenome*?",
     finalizado: "🚫 Atendimento finalizado. Obrigado! 🙏",
     encerrado: "👋 Atendimento encerrado. Esperamos te ver em breve! 🙏",
+    retorno: (nome) =>
+      `👋 Olá novamente, ${nome}! O que você gostaria de fazer?\n\n1️⃣ Ver resumo do último pedido\n2️⃣ Iniciar um novo pedido\n\n_(digite 9️⃣ para encerrar)_`,
+    retornoAposResumo: `Você gostaria de:\n\n2️⃣ Iniciar um novo pedido\n\n9️⃣ Encerrar o atendimento`,
   },
   pedidos: {
     nome: (nome) =>
@@ -36,6 +39,8 @@ module.exports = {
     jogosNumerosInvalidos:
       "❌ Um ou mais números de jogos são inválidos. Escolha entre:",
     simNaoInvalido: "❌ Opção inválida. Responda:\n\n1️⃣ Sim\n2️⃣ Não",
+    opcaoRetornoInvalida:
+      "❌ Opção inválida. Escolha:\n\n1️⃣ Ver resumo\n2️⃣ Iniciar um novo pedido",
   },
   opcoes: {
     modelo: "1️⃣ Fat\n2️⃣ Slim\n3️⃣ Super Slim",

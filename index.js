@@ -1,3 +1,4 @@
+// index.js
 // Gera ID
 const { v4: uuidv4 } = require("uuid");
 
@@ -42,14 +43,11 @@ client.on("qr", (qr) => {
   qrcode.generate(qr, { small: true });
 });
 
-// client.on("ready", () => {
-//   console.log("🤖 CHATBOT DA HORA GAMES está online!");
-// });
-
 logInfo("🤖 CHATBOT está online!");
 
 client.on("message", async (msg) => {
   const chatId = msg.from;
+  const userMessage = msg.body.trim();
 
   // Busca a sessão do usuário no Supabase
   let { data: session, error: selectError } = await supabase
@@ -63,17 +61,8 @@ client.on("message", async (msg) => {
     return;
   }
 
-  // Se a mensagem for '0', reinicia a sessão
-  if (msg.body.trim() === "0") {
-    if (session) {
-      await supabase.from("sessions").delete().eq("chatId", chatId);
-    }
-    await client.sendMessage(chatId, content.saudacao.reiniciado);
-    return;
-  }
-
-  // Se a mensagem for '9', encerra a sessão
-  if (msg.body.trim() === "9") {
+  // --- CORREÇÃO: Lógica de encerramento e reinício no topo ---
+  if (userMessage === "9") {
     if (session) {
       await supabase.from("sessions").delete().eq("chatId", chatId);
     }
@@ -81,16 +70,95 @@ client.on("message", async (msg) => {
     return;
   }
 
+  if (userMessage === "0") {
+    if (session) {
+      session.stage = 0;
+      session.data = {}; // Limpa os dados da sessão anterior
+      const serviceId = `OS-${uuidv4().substring(0, 8).toUpperCase()}`; // reduz o ID para oito caracteres
+      session.data.serviceId = serviceId; // Gera um novo ID para o novo pedido
+      await supabase.from("sessions").update(session).eq("chatId", chatId);
+      await client.sendMessage(chatId, content.saudacao.reiniciado);
+    } else {
+      await client.sendMessage(chatId, content.saudacao.reiniciado);
+    }
+    return;
+  }
+  // --- FIM DA CORREÇÃO ---
+
+  // Se a sessão existir e estiver no estágio final (8)
+  if (session && session.stage === 8) {
+    if (userMessage === "1") {
+      // Opção 1: Ver resumo do último pedido
+      const { data: pedido, error: pedidoError } = await supabase
+        .from("pedidos")
+        .select("*")
+        .eq("service_id", session.data.serviceId)
+        .single();
+
+      if (pedidoError || !pedido) {
+        await client.sendMessage(
+          chatId,
+          "⚠️ Não foi possível encontrar seu último pedido. Por favor, inicie um novo atendimento."
+        );
+        session.stage = 0;
+        session.data = {};
+        await supabase.from("sessions").update(session).eq("chatId", chatId);
+        await client.sendMessage(chatId, content.saudacao.inicio);
+        return;
+      }
+
+      let resumo = `
+*📋 RESUMO DO SEU ÚLTIMO PEDIDO:*
+🆔 ID DO SERVIÇO: ${pedido.service_id}
+👤 NOME: ${pedido.nome}
+📧 EMAIL: ${pedido.email}
+🏠 ENDEREÇO: ${pedido.endereco}
+🎮 MODELO: ${pedido.modelo}
+📅 ANO: ${pedido.ano}
+💾 ARMAZENAMENTO: ${pedido.armazenamento}
+🛠️ SERVIÇO: ${pedido.tipo_servico}`;
+
+      if (pedido.jogos) {
+        resumo += `\n🎮 JOGOS:`;
+        pedido.jogos.forEach((jogo, index) => {
+          resumo += `\n${index + 1}. ${jogo}`;
+        });
+      }
+
+      await client.sendMessage(chatId, resumo);
+
+      // NOVO: Envia o novo menu simplificado após o resumo
+      await client.sendMessage(chatId, content.saudacao.retornoAposResumo);
+      return;
+    } else if (userMessage === "2") {
+      // Opção 2: Iniciar um novo pedido
+      session.stage = 0;
+      session.data = {}; // Limpa os dados da sessão anterior
+      const serviceId = `OS-${uuidv4().substring(0, 8).toUpperCase()}`;
+      session.data.serviceId = serviceId; // Gera um novo ID para o novo pedido
+      await client.sendMessage(chatId, content.saudacao.reiniciado);
+      await supabase.from("sessions").update(session).eq("chatId", chatId);
+      return;
+    } else {
+      // Se o usuário digitar qualquer outra coisa (como 'oi' ou 'ola')
+      await client.sendMessage(
+        chatId,
+        content.saudacao.retorno(session.data.nome)
+      );
+      return;
+    }
+  }
+
   // Se a sessão não existir, cria uma nova no banco de dados
   if (!session) {
-    const serviceId = `OS-${uuidv4().substring(0, 8).toUpperCase()}`; // Gera um ID único no início da sessão no formato: Ex.: 'OS-123AC3G6'
+    const serviceId = `OS-${uuidv4().substring(0, 8).toUpperCase()}`; // Gera um ID único no início da sessão
     const { data: newSession, error: insertError } = await supabase
       .from("sessions")
       .insert([
         {
           chatId: chatId,
           stage: 0,
-          data: { serviceId: serviceId }, // Armazena o ID na Sessão
+          data: { serviceId: serviceId }, // Armazena o ID na sessão
         },
       ])
       .select()
@@ -103,33 +171,34 @@ client.on("message", async (msg) => {
     await client.sendMessage(chatId, content.saudacao.inicio);
     return;
   }
-  // O restante da sua lógica 'switch'
+
+  // --- LÓGICA DO FLUXO PRINCIPAL ---
   switch (session.stage) {
     case 0:
-      session.data.nome = msg.body.trim();
+      session.data.nome = userMessage;
       session.stage = 1;
       await client.sendMessage(chatId, content.pedidos.nome(session.data.nome));
       break;
 
     case 1:
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(msg.body.trim())) {
+      if (!emailRegex.test(userMessage)) {
         await client.sendMessage(chatId, content.erros.emailInvalido);
-        break; // Use break para continuar na mesma etapa
+        break;
       }
-      session.data.email = msg.body.trim();
+      session.data.email = userMessage;
       session.stage = 2;
       await client.sendMessage(chatId, content.pedidos.email);
       break;
 
     case 2:
-      session.data.endereco = msg.body.trim();
+      session.data.endereco = userMessage;
       session.stage = 3;
       await client.sendMessage(chatId, content.pedidos.endereco);
       break;
 
     case 3:
-      if (!["1", "2", "3"].includes(msg.body.trim())) {
+      if (!["1", "2", "3"].includes(userMessage)) {
         await client.sendMessage(
           chatId,
           content.erros.opcaoInvalida(content.opcoes.modelo)
@@ -137,9 +206,9 @@ client.on("message", async (msg) => {
         break;
       }
       session.data.modelo =
-        msg.body.trim() === "1"
+        userMessage === "1"
           ? "Fat"
-          : msg.body.trim() === "2"
+          : userMessage === "2"
           ? "Slim"
           : "Super Slim";
       session.stage = 4;
@@ -147,7 +216,7 @@ client.on("message", async (msg) => {
       break;
 
     case 4:
-      const ano = parseInt(msg.body.trim());
+      const ano = parseInt(userMessage);
       if (isNaN(ano) || ano < 2007 || ano > 2015) {
         await client.sendMessage(chatId, content.erros.anoInvalido);
         break;
@@ -164,7 +233,7 @@ client.on("message", async (msg) => {
       break;
 
     case 41:
-      if (msg.body.trim() === "1") {
+      if (userMessage === "1") {
         session.stage = 5;
         await client.sendMessage(chatId, content.pedidos.armazenamento);
       } else {
@@ -174,7 +243,7 @@ client.on("message", async (msg) => {
       break;
 
     case 5:
-      if (!["1", "2", "3", "4"].includes(msg.body.trim())) {
+      if (!["1", "2", "3", "4"].includes(userMessage)) {
         await client.sendMessage(
           chatId,
           content.erros.opcaoInvalida(content.opcoes.armazenamento)
@@ -182,7 +251,7 @@ client.on("message", async (msg) => {
         break;
       }
 
-      if (msg.body.trim() === "4") {
+      if (userMessage === "4") {
         session.data.armazenamento = "Não possui";
         session.stage = 51;
         await client.sendMessage(chatId, content.pedidos.avisoSemArmazenamento);
@@ -190,15 +259,15 @@ client.on("message", async (msg) => {
       }
 
       session.data.armazenamento =
-        msg.body.trim() === "1"
+        userMessage === "1"
           ? "HD interno"
-          : msg.body.trim() === "2"
+          : userMessage === "2"
           ? "HD externo"
           : "Pendrive 16GB+";
       session.stage = 6;
 
       let listaJogos = "";
-      const limiteJogos = 15; // Define o limite de jogos aqui
+      const limiteJogos = 15;
       for (const key in config.jogos) {
         listaJogos += `${key}. ${config.jogos[key]}\n`;
       }
@@ -211,7 +280,7 @@ client.on("message", async (msg) => {
       break;
 
     case 51:
-      if (msg.body.trim() === "1") {
+      if (userMessage === "1") {
         session.data.tipo_servico = "Somente desbloqueio";
         session.stage = 7;
         await client.sendMessage(chatId, content.pedidos.localizacao);
@@ -223,7 +292,7 @@ client.on("message", async (msg) => {
 
     case 6:
       const jogosOpcoes = config.jogos;
-      let numerosEscolhidos = msg.body.split(",").map((n) => n.trim());
+      let numerosEscolhidos = userMessage.split(",").map((n) => n.trim());
 
       if (numerosEscolhidos.length === 0 || numerosEscolhidos.length > 15) {
         await client.sendMessage(chatId, content.erros.jogosInvalidos);
@@ -248,7 +317,7 @@ client.on("message", async (msg) => {
       break;
 
     case 7:
-      if (!["1", "2"].includes(msg.body.trim())) {
+      if (!["1", "2"].includes(userMessage)) {
         await client.sendMessage(chatId, content.erros.simNaoInvalido);
         break;
       }
@@ -269,18 +338,18 @@ client.on("message", async (msg) => {
       session.data.tipo_servico = tipo_servico;
 
       let resumo = `
-*🆔 ID do Serviço:* ${session.data.serviceId}
-*📋 Resumo do Pedido:*
-👤 Nome: ${session.data.nome}
-📧 Email: ${session.data.email}
-🏠 Endereço: ${session.data.endereco}
-🎮 Modelo: ${session.data.modelo}
-📅 Ano: ${session.data.ano}
-💾 Armazenamento: ${session.data.armazenamento}
-🛠️ Serviço: ${session.data.tipo_servico}`;
+*🆔 ID DO SERVIÇO:* ${session.data.serviceId}
+*📋 RESUMO DO PEDIDO:*
+👤 NOME: ${session.data.nome}
+📧 EMAIL: ${session.data.email}
+🏠 ENDEREÇO: ${session.data.endereco}
+🎮 MODELO: ${session.data.modelo}
+📅 ANO: ${session.data.ano}
+💾 ARMAZENAMENTO: ${session.data.armazenamento}
+🛠️ SERVIÇO: ${session.data.tipo_servico}`;
 
       if (session.data.jogos) {
-        resumo += `\n🎮 Jogos:`;
+        resumo += `\n🎮 JOGOS:`;
         session.data.jogos.forEach((jogo, index) => {
           resumo += `\n${index + 1}. ${jogo}`;
         });
@@ -288,14 +357,13 @@ client.on("message", async (msg) => {
 
       await client.sendMessage(chatId, resumo);
 
-      if (msg.body.trim() === "1") {
+      if (userMessage === "1") {
         await client.sendMessage(
           chatId,
           `📍 Localização: ${config.localizacao}`
         );
       }
 
-      // 💾 LÓGICA PARA SALVAR OS DADOS NO SUPABASE 💾
       const { data, error } = await supabase.from("pedidos").insert([
         {
           service_id: session.data.serviceId,
@@ -316,16 +384,18 @@ client.on("message", async (msg) => {
         logInfo("Dados do pedido salvos com sucesso", session);
       }
 
-      // Deleta a sessão 'sessions' após o pedido finalizado
-      await supabase.from("sessions").delete().eq("chatId", chatId);
+      session.stage = 8;
       await client.sendMessage(
         chatId,
         content.pedidos.concluido(session.data.nome)
       );
+
+      // ADICIONADO: Atraso de 1.5 segundos para evitar que a mensagem de retorno seja disparada automaticamente
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       break;
   }
 
-  // Atualiza o estado da sessão no banco de dados após cada etapa
   const { error: updateError } = await supabase
     .from("sessions")
     .update(session)
