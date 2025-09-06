@@ -90,7 +90,7 @@ client.on("message", async (msg) => {
         {
           chatId: chatId,
           stage: 0,
-          data: { serviceId: serviceId }, // Armazena o ID na sessão
+          data: { serviceId: serviceId }, // Armazena o ID na Sessão
         },
       ])
       .select()
