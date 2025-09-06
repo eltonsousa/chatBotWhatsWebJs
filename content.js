@@ -12,7 +12,7 @@ module.exports = {
     encerrado: "👋 Atendimento encerrado. Esperamos te ver em breve! 🙏",
     retorno: (nome) =>
       `👋 Olá novamente, ${nome}! O que você gostaria de fazer?\n\n1️⃣ Ver resumo do último pedido\n2️⃣ Iniciar um novo pedido\n\n_(digite 9️⃣ para encerrar)_`,
-    retornoAposResumo: `Você gostaria de:\n\n2️⃣ Iniciar um novo pedido\n\n9️⃣ Encerrar o atendimento`,
+    retornoAposResumo: `Você gostaria de:\n\n2️⃣ Iniciar um novo pedido\n9️⃣ Encerrar o atendimento`,
   },
   pedidos: {
     nome: (nome) =>
