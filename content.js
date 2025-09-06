@@ -35,7 +35,7 @@ module.exports = {
     opcaoInvalida: (opcoes) => `❌ Opção inválida. Escolha:\n${opcoes}`,
     anoInvalido: "❌ Ano inválido. Digite entre 2007 e 2015.",
     jogosInvalidos:
-      "❌ Escolha no mínimo 1 e no máximo 3 jogos. Exemplo: 1,2,3",
+      "❌ Escolha no mínimo 1 e no máximo 15 jogos. Exemplo: 1,2,3",
     jogosNumerosInvalidos:
       "❌ Um ou mais números de jogos são inválidos. Escolha entre:",
     simNaoInvalido: "❌ Opção inválida. Responda:\n\n1️⃣ Sim\n2️⃣ Não",

@@ -1,7 +1,4 @@
-// index.js
-// Gera ID
-const { v4: uuidv4 } = require("uuid");
-
+const { v4: uuidv4 } = require("uuid"); // Gera ID
 const { Client, LocalAuth } = require("whatsapp-web.js");
 const qrcode = require("qrcode-terminal");
 const { createClient } = require("@supabase/supabase-js");
@@ -22,9 +19,8 @@ function logError(message, error, session) {
     error
   );
 }
-// Logs personalizados
+// Fim logs personalizados
 
-// Função para simular a digitação e enviar a mensagem
 // Função para simular a digitação e enviar a mensagem
 async function sendWithTypingDelay(chatId, message, delayMs = 1500) {
   const chat = await client.getChatById(chatId);
@@ -38,7 +34,7 @@ async function sendWithTypingDelay(chatId, message, delayMs = 1500) {
   // 💬 Envia a mensagem (a animação de "digitando" para automaticamente)
   await client.sendMessage(chatId, message);
 }
-// Simular digitação
+// Fim função para simular a digitação e enviar a mensagem
 
 // Importa as configurações e o conteúdo
 const config = require("./config.js");
