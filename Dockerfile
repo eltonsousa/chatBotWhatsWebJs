@@ -42,8 +42,8 @@ RUN npm install --production
 
 COPY . .
 
-# Healthcheck separado na porta 8080
+# Healthcheck usa a rota / do mesmo servidor
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-  CMD curl -f http://localhost:${HEALTH_PORT:-8080}/ || exit 1
+  CMD curl -f http://localhost:${PORT:-3000}/ || exit 1
 
 CMD ["npm", "start"]

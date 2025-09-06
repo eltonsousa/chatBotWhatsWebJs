@@ -81,8 +81,16 @@ client.on("qr", (qr) => {
   console.log("⚡ Novo QR gerado. Acesse /qr para escanear.");
 });
 
+////////////////////////////////////////////////////////////////////////////////
+// Servidor Express
 const app = express();
 
+// rota de healthcheck
+app.get("/", (req, res) => {
+  res.send("OK");
+});
+
+// rota do QR Code
 app.get("/qr", async (req, res) => {
   if (!latestQR) {
     return res.send("Nenhum QR disponível. Aguarde o bot gerar um novo.");
@@ -94,10 +102,10 @@ app.get("/qr", async (req, res) => {
   );
 });
 
-app.listen(process.env.PORT || 3000, () => {
-  console.log(
-    `🌍 Servidor web rodando em http://localhost:${process.env.PORT || 3000}`
-  );
+// 🚀 Usa a porta definida pelo Railway
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🌍 Servidor rodando na porta ${PORT}`);
 });
 ////////////////////////////////////////////////////////////////////////////////
 
