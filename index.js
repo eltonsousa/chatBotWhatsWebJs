@@ -83,35 +83,26 @@ client.on("message", async (msg) => {
 
   // Se a sessão não existir, cria uma nova no banco de dados
   if (!session) {
-    const { error: insertError } = await supabase.from("sessions").insert([
-      {
-        chatId: chatId,
-        stage: 0,
-        data: {},
-      },
-    ]);
+    const serviceId = `OS-${uuidv4().substring(0, 8).toUpperCase()}`; // Gera um ID único no início da sessão no formato: Ex.: 'OS-123AC3G6'
+    const { data: newSession, error: insertError } = await supabase
+      .from("sessions")
+      .insert([
+        {
+          chatId: chatId,
+          stage: 0,
+          data: { serviceId: serviceId }, // Armazena o ID na sessão
+        },
+      ])
+      .select()
+      .single();
     if (insertError) {
       console.error("Erro ao criar nova sessão:", insertError);
-      return;
-    }
-    // Busca a nova sessão para continuar o fluxo
-    const { data: newSession, error: fetchError } = await supabase
-      .from("sessions")
-      .select("*")
-      .eq("chatId", chatId)
-      .single();
-    if (fetchError) {
-      console.error("Erro ao buscar a sessão recém-criada:", fetchError);
       return;
     }
     session = newSession;
     await client.sendMessage(chatId, content.saudacao.inicio);
     return;
   }
-  //inserir ID
-  const serviceId = `OS-${Date.now()}`;
-  session.data.serviceId = serviceId;
-
   // O restante da sua lógica 'switch'
   switch (session.stage) {
     case 0:
