@@ -1,8 +1,8 @@
-# 🤖 Chatbot da Hora Games
+# 🤖 Chatbot da Hora Games - versão: 1.0.0
 
 Este projeto é um chatbot automatizado para WhatsApp utilizando **[whatsapp-web.js](https://github.com/pedroslopez/whatsapp-web.js)**, integrado com **Supabase** para gerenciamento de sessões e pedidos.
 
-O sistema foi desenvolvido para a loja **Hora Games**, permitindo que clientes iniciem atendimentos, solicitem serviços de desbloqueio, instalação de jogos e recebam informações personalizadas.
+O sistema foi desenvolvido para a loja **Da Hora Games**, permitindo que clientes iniciem atendimentos, solicitem serviços de desbloqueio, instalação de jogos e recebam informações personalizadas.
 
 ---
 
@@ -62,8 +62,8 @@ npm start
 
 ## Acesse:
 
-http://localhost:3000/ → healthcheck (OK)
-http://localhost:3000/qr → QR Code para login no WhatsApp
+- http://localhost:3000/ → healthcheck (OK)
+- http://localhost:3000/qr → QR Code para login no WhatsApp
 
 ---
 
@@ -105,9 +105,9 @@ railway up
 
 ## 👨‍💻 Autor
 
-Projeto desenvolvido por Elton Sousa 🚀
-📧 Email: eltonsousadesigner@gmail.com
+- Projeto desenvolvido por Elton Sousa 🚀
+- 📧 Email: eltonsousadesigner@gmail.com
 
-📍 Localização: Brasil
+- 📍 Localização: Brasil
 
 ---
