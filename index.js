@@ -363,13 +363,22 @@ client.on("message", async (msg) => {
 
     case 6:
       const jogosOpcoes = config.jogos;
-      let numerosEscolhidos = userMessage.split(",").map((n) => n.trim());
+      // 1. Limpa a entrada do usuário e separa os números
+      let numerosEscolhidos = userMessage
+        .split(",")
+        .map((n) => n.trim())
+        .filter((n) => n !== ""); // 2. Filtra strings vazias
 
+      // 3. Valida o limite de jogos após a limpeza
       if (numerosEscolhidos.length === 0 || numerosEscolhidos.length > 15) {
-        await sendWithTypingDelay(chatId, content.erros.jogosInvalidos);
+        await sendWithTypingDelay(
+          chatId,
+          content.erros.jogosInvalidos // Use uma mensagem clara sobre o limite
+        );
         break;
       }
 
+      // 4. Valida se todos os números escolhidos são válidos
       const todosValidos = numerosEscolhidos.every((n) => jogosOpcoes[n]);
       if (!todosValidos) {
         await sendWithTypingDelay(
