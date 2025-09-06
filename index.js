@@ -1,3 +1,8 @@
+////////////////////////////////////////////////////////////////////////////////
+const express = require("express");
+const QRCode = require("qrcode");
+////////////////////////////////////////////////////////////////////////////////
+
 const { v4: uuidv4 } = require("uuid"); // Gera ID
 const { Client, LocalAuth } = require("whatsapp-web.js");
 const qrcode = require("qrcode-terminal");
@@ -45,6 +50,16 @@ const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+////////////////////////////////////////////////////////////////////////////////
+// Ler QR Code na web
+let latestQR = null;
+
+client.on("qr", (qr) => {
+  latestQR = qr;
+  console.log("⚡ Novo QR gerado. Acesse /qr para escanear.");
+});
+////////////////////////////////////////////////////////////////////////////////
+
 // Inicializa o cliente do WhatsApp
 const client = new Client({
   authStrategy: new LocalAuth(),
@@ -66,6 +81,27 @@ const client = new Client({
 client.on("qr", (qr) => {
   qrcode.generate(qr, { small: true });
 });
+
+////////////////////////////////////////////////////////////////////////////////
+const app = express();
+
+app.get("/qr", async (req, res) => {
+  if (!latestQR) {
+    return res.send("Nenhum QR disponível. Aguarde o bot gerar um novo.");
+  }
+  const qrImage = await QRCode.toDataURL(latestQR);
+  res.type("html");
+  res.send(
+    `<h2>Escaneie o QR Code abaixo com seu WhatsApp:</h2><br><img src="${qrImage}" />`
+  );
+});
+
+app.listen(process.env.PORT || 3000, () => {
+  console.log(
+    `🌍 Servidor web rodando em http://localhost:${process.env.PORT || 3000}`
+  );
+});
+////////////////////////////////////////////////////////////////////////////////
 
 logInfo("🤖 CHATBOT está online!");
 
