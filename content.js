@@ -35,7 +35,7 @@ module.exports = {
     opcoes: {
       1: "🔧 O desbloqueio RGH3 permite rodar jogos direto do HD interno ou externo, sem precisar comprar jogos originais.\nCom ele você também pode:\n\n* Jogar emuladores\n* Instalar apps e homebrews\n* Personalizar o console\n* Aproveitar muito mais recursos!\n\n_(digite 0️⃣ para voltar ao menu)_",
       2: "⚙️ Para fazer o desbloqueio, é necessário:\n\n* Ter um Xbox 360 fabricado até 2014\n* Um HD interno, externo ou pendrive de pelo menos 16GB\n\n⚠️ Sem armazenamento não é possível copiar e nem jogar os games.\n\n_(digite 0️⃣ para voltar ao menu)_",
-      3: "🎮 Tenho uma lista atualizada de jogos para instalação.\n🔗 [Aqui você coloca o link da lista ou envia em PDF/Imagem]\n\n_(digite 0️⃣ para voltar ao menu)_",
+      3: "🎮 Tenho uma lista atualizada de jogos para instalação:\n\n_(digite 0️⃣ para voltar ao menu)_", // Alterado para não incluir a lista de jogos
       4: "🌐 Não é recomendado jogar online com Xbox desbloqueado, pois existe risco de banimento da Xbox Live.\n🚫 O desbloqueio é ideal para jogar offline e aproveitar jogos direto do HD.\n\n_(digite 0️⃣ para voltar ao menu)_",
       5: "🚚 Não atendo a domicílio.\n📍 O cliente deve trazer o console no meu endereço.\n\n⏱️ O prazo de entrega é em média 24 horas.\n\n_(digite 0️⃣ para voltar ao menu)_",
       6: "💰 O desbloqueio RGH3 custa R$ 150,00.\nO valor já inclui:\n\n✅ Limpeza interna\n✅ Troca da pasta térmica\n✅ Instalação de 15 jogos da minha lista\n\n_(digite 0️⃣ para voltar ao menu)_",

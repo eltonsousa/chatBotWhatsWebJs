@@ -245,8 +245,16 @@ client.on("message", async (msg) => {
     case -1: // Estágio do menu principal do FAQ
       if (userMessage === "0") {
         await sendWithTypingDelay(chatId, content.faq.menu);
+      } else if (userMessage === "3") {
+        let listaJogos = "";
+        for (const key in config.jogos) {
+          listaJogos += `*${key}.* ${config.jogos[key]}\n`;
+        }
+        const mensagemCompleta = `${content.faq.opcoes[userMessage]}\n${listaJogos}`;
+        await sendWithTypingDelay(chatId, mensagemCompleta);
+        session.stage = -2; // Move para o novo estágio de espera
       } else if (userMessage in content.faq.opcoes) {
-        // Entra neste bloco para respostas do FAQ (opções 1 a 6)
+        // Entra neste bloco para respostas do FAQ (opções 1, 2, 4, 5, 6)
         await sendWithTypingDelay(chatId, content.faq.opcoes[userMessage]);
         session.stage = -2; // Move para o novo estágio de espera
       } else if (userMessage === "7") {
