@@ -126,7 +126,7 @@ client.on("message", async (msg) => {
     return;
   }
 
-  // --- CORREÇÃO: Lógica de encerramento e reinício no topo ---
+  // --- Lógica de encerramento e reinício no topo ---
   if (userMessage === "9") {
     if (session) {
       await supabase.from("sessions").delete().eq("chatId", chatId);
@@ -137,18 +137,17 @@ client.on("message", async (msg) => {
 
   if (userMessage === "0") {
     if (session) {
-      session.stage = 0;
+      session.stage = -1;
       session.data = {}; // Limpa os dados da sessão anterior
-      const serviceId = `OS-${uuidv4().substring(0, 8).toUpperCase()}`;
-      session.data.serviceId = serviceId; // Novo ID
       await supabase.from("sessions").update(session).eq("chatId", chatId);
-      await sendWithTypingDelay(chatId, content.saudacao.reiniciado);
-    } else {
-      await sendWithTypingDelay(chatId, content.saudacao.reiniciado);
     }
+    await sendWithTypingDelay(
+      chatId,
+      content.saudacao.reiniciado + content.faq.menu
+    );
     return;
   }
-  // --- FIM DA CORREÇÃO ---
+  // --- FIM DA LÓGICA DE ENCERRAMENTO E REINÍCIO ---
 
   // Se a sessão existir e estiver no estágio final (8)
   if (session && session.stage === 8) {
@@ -165,10 +164,13 @@ client.on("message", async (msg) => {
           chatId,
           "⚠️ Não foi possível encontrar seu último pedido. Por favor, inicie um novo atendimento."
         );
-        session.stage = 0;
+        session.stage = -1;
         session.data = {};
         await supabase.from("sessions").update(session).eq("chatId", chatId);
-        await sendWithTypingDelay(chatId, content.saudacao.inicio);
+        await sendWithTypingDelay(
+          chatId,
+          content.saudacao.inicio + content.faq.menu
+        );
         return;
       }
 
@@ -201,7 +203,10 @@ client.on("message", async (msg) => {
       session.data = {}; // Limpa os dados da sessão anterior
       const serviceId = `OS-${uuidv4().substring(0, 8).toUpperCase()}`;
       session.data.serviceId = serviceId; // Gera um novo ID para o novo pedido
-      await sendWithTypingDelay(chatId, content.saudacao.reiniciado);
+      await sendWithTypingDelay(
+        chatId,
+        content.saudacao.reiniciado + content.faq.menu
+      );
       await supabase.from("sessions").update(session).eq("chatId", chatId);
       return;
     } else {
@@ -214,16 +219,15 @@ client.on("message", async (msg) => {
     }
   }
 
-  // Se a sessão não existir, cria uma nova no banco de dados
+  // Se a sessão não existir, cria uma nova no banco de dados com o stage -1 (FAQ)
   if (!session) {
-    const serviceId = `OS-${uuidv4().substring(0, 8).toUpperCase()}`; // Gera um ID único no início da sessão
     const { data: newSession, error: insertError } = await supabase
       .from("sessions")
       .insert([
         {
           chatId: chatId,
-          stage: 0,
-          data: { serviceId: serviceId }, // Armazena o ID na sessão
+          stage: -1, // Novo estágio inicial para o FAQ
+          data: {},
         },
       ])
       .select()
@@ -234,12 +238,31 @@ client.on("message", async (msg) => {
     }
     session = newSession;
     await sendWithTypingDelay(chatId, content.saudacao.inicio);
+    await sendWithTypingDelay(chatId, content.faq.menu);
     return;
   }
 
   // --- LÓGICA DO FLUXO PRINCIPAL ---
   switch (session.stage) {
-    case 0:
+    case -1: // Novo estágio para o FAQ
+      if (userMessage === "0") {
+        await sendWithTypingDelay(chatId, content.faq.menu);
+      } else if (userMessage in content.faq.opcoes) {
+        await sendWithTypingDelay(chatId, content.faq.opcoes[userMessage]);
+      } else if (userMessage === "7") {
+        session.stage = 0; // Inicia o fluxo principal
+        const serviceId = `OS-${uuidv4().substring(0, 8).toUpperCase()}`;
+        session.data.serviceId = serviceId; // Gera um novo ID
+        await sendWithTypingDelay(chatId, content.saudacao.inicio);
+      } else if (userMessage === "8") {
+        await supabase.from("sessions").delete().eq("chatId", chatId);
+        await sendWithTypingDelay(chatId, content.saudacao.finalizado);
+      } else {
+        await sendWithTypingDelay(chatId, content.erros.opcaoFaqInvalida);
+      }
+      break;
+
+    case 0: // Pedir o nome (antigo case 0)
       session.data.nome = userMessage;
       session.stage = 1;
       await sendWithTypingDelay(
@@ -248,7 +271,7 @@ client.on("message", async (msg) => {
       );
       break;
 
-    case 1:
+    case 1: // Pedir e-mail (antigo case 1)
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(userMessage)) {
         await sendWithTypingDelay(chatId, content.erros.emailInvalido);
@@ -259,13 +282,13 @@ client.on("message", async (msg) => {
       await sendWithTypingDelay(chatId, content.pedidos.email);
       break;
 
-    case 2:
+    case 2: // Pedir endereço (antigo case 2)
       session.data.endereco = userMessage;
       session.stage = 3;
       await sendWithTypingDelay(chatId, content.pedidos.endereco);
       break;
 
-    case 3:
+    case 3: // Pedir modelo (antigo case 3)
       if (!["1", "2", "3"].includes(userMessage)) {
         await sendWithTypingDelay(
           chatId,
@@ -283,7 +306,7 @@ client.on("message", async (msg) => {
       await sendWithTypingDelay(chatId, content.pedidos.ano);
       break;
 
-    case 4:
+    case 4: // Pedir ano (antigo case 4)
       const ano = parseInt(userMessage);
       if (isNaN(ano) || ano < 2007 || ano > 2015) {
         await sendWithTypingDelay(chatId, content.erros.anoInvalido);
@@ -300,7 +323,7 @@ client.on("message", async (msg) => {
       }
       break;
 
-    case 41:
+    case 41: // Confirmação do ano 2015 (antigo case 41)
       if (userMessage === "1") {
         session.stage = 5;
         await sendWithTypingDelay(chatId, content.pedidos.armazenamento);
@@ -310,7 +333,7 @@ client.on("message", async (msg) => {
       }
       break;
 
-    case 5:
+    case 5: // Pedir armazenamento (antigo case 5)
       if (!["1", "2", "3", "4"].includes(userMessage)) {
         await sendWithTypingDelay(
           chatId,
@@ -350,7 +373,7 @@ client.on("message", async (msg) => {
       );
       break;
 
-    case 51:
+    case 51: // Confirmação de sem armazenamento (antigo case 51)
       if (userMessage === "1") {
         session.data.tipo_servico = "Somente desbloqueio";
         session.stage = 7;
@@ -361,7 +384,7 @@ client.on("message", async (msg) => {
       }
       break;
 
-    case 6:
+    case 6: // Escolher jogos (antigo case 6)
       const jogosOpcoes = config.jogos;
       // 1. Limpa a entrada do usuário e separa os números
       let numerosEscolhidos = userMessage
@@ -396,7 +419,7 @@ client.on("message", async (msg) => {
       await sendWithTypingDelay(chatId, content.pedidos.localizacao);
       break;
 
-    case 7:
+    case 7: // Confirmação e resumo (antigo case 7)
       if (!["1", "2"].includes(userMessage)) {
         await sendWithTypingDelay(chatId, content.erros.simNaoInvalido);
         break;
