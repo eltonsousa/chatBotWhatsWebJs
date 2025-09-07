@@ -250,12 +250,12 @@ client.on("message", async (msg) => {
         for (const key in config.jogos) {
           listaJogos += `*${key}.* ${config.jogos[key]}\n`;
         }
-        // Concatenação na ordem correta: texto base + lista de jogos + instrução
-        const mensagemCompleta = `${content.faq.opcoes[userMessage]}\n\n${listaJogos}\n${content.instrucoesVoltarAoMenu}`;
+        // Concatena o texto base, a lista de jogos e a instrução de retorno
+        const mensagemCompleta = `${content.faq.opcoes[userMessage]}\n\n${listaJogos}${content.instrucoesVoltarAoMenu}`;
         await sendWithTypingDelay(chatId, mensagemCompleta);
         session.stage = -2; // Move para o novo estágio de espera
       } else if (userMessage in content.faq.opcoes) {
-        // Entra neste bloco para respostas do FAQ (opções 1, 2, 4, 5, 6)
+        // Envia a resposta das outras opções do FAQ, que já contêm a instrução de retorno
         await sendWithTypingDelay(chatId, content.faq.opcoes[userMessage]);
         session.stage = -2; // Move para o novo estágio de espera
       } else if (userMessage === "7") {

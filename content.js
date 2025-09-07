@@ -1,6 +1,6 @@
 // content.js
-const instrucoesVoltarAoMenu = `_(digite 0️⃣ para voltar ao menu)_`;
 const instrucoesReiniciarOuEncerrar = `_(digite 0️⃣ para reiniciar, ou 9️⃣ para encerrar)_`;
+const instrucoesVoltarAoMenu = `\n\n_(digite 0️⃣ para voltar ao menu)_`;
 
 module.exports = {
   instrucoesReiniciarOuEncerrar,
@@ -19,7 +19,49 @@ module.exports = {
       `👋 Olá novamente, ${nome}! O que você gostaria de fazer?\n\n1️⃣ Ver resumo do último pedido\n2️⃣ Iniciar um novo pedido\n\n_(digite 9️⃣ para encerrar)_`,
     retornoAposResumo: `Você gostaria de:\n\n2️⃣ Iniciar um novo pedido\n9️⃣ Encerrar o atendimento`,
   },
+  faq: {
+    menu: `
+*🟢 Menu de Dúvidas - Xbox 360 (RGH3)*
+1️⃣ ❓ O que é RGH3?
+2️⃣ ⚙️ Requisitos
+3️⃣ 🎮 Lista de jogos
+4️⃣ 🌐 Jogar online
+5️⃣ 🚚 Atendimento / Prazo
+6️⃣ 💰 Valor do serviço
 
+*📌 Opções extras:*
+7️⃣ Continuar para atendimento
+8️⃣ Encerrar atendimento
+`,
+    opcoes: {
+      1: `🔧 O desbloqueio RGH3 permite rodar jogos direto do HD interno ou externo, sem precisar comprar jogos originais.
+Com ele você também pode:
+
+* Jogar emuladores
+* Instalar apps e homebrews
+* Personalizar o console
+* Aproveitar muito mais recursos!${instrucoesVoltarAoMenu}`,
+      2: `⚙️ Para fazer o desbloqueio, é necessário:
+
+* Ter um Xbox 360 fabricado até 2014
+* Um HD interno, externo ou pendrive de pelo menos 16GB
+
+⚠️ Sem armazenamento não é possível copiar e nem jogar os games.${instrucoesVoltarAoMenu}`,
+      3: "🎮 Tenho uma lista atualizada de jogos para instalação:", // Este texto será o "cabeçalho"
+      4: `🌐 Não é recomendado jogar online com Xbox desbloqueado, pois existe risco de banimento da Xbox Live.
+🚫 O desbloqueio é ideal para jogar offline e aproveitar jogos direto do HD.${instrucoesVoltarAoMenu}`,
+      5: `🚚 Não atendo a domicílio.
+📍 O cliente deve trazer o console no meu endereço.
+
+⏱️ O prazo de entrega é em média 24 horas.${instrucoesVoltarAoMenu}`,
+      6: `💰 O desbloqueio RGH3 custa R$ 150,00.
+O valor já inclui:
+
+✅ Limpeza interna
+✅ Troca da pasta térmica
+✅ Instalação de 15 jogos da minha lista${instrucoesVoltarAoMenu}`,
+    },
+  },
   pedidos: {
     nome: (nome) =>
       `✅ Obrigado, ${nome}!\n\n📧 Agora, informe o seu *email*:\n\n${instrucoesReiniciarOuEncerrar}`,
@@ -55,30 +97,5 @@ module.exports = {
     modelo: "1️⃣ Fat\n2️⃣ Slim\n3️⃣ Super Slim",
     armazenamento:
       "1️⃣ HD interno\n2️⃣ HD externo\n3️⃣ Pendrive 16GB+\n4️⃣ Não tenho",
-  },
-
-  faq: {
-    menu: `
-*🟢 Menu de Dúvidas - Xbox 360 (RGH3)*
-1️⃣ ❓ O que é RGH3?
-2️⃣ ⚙️ Requisitos
-3️⃣ 🎮 Lista de jogos
-4️⃣ 🌐 Jogar online
-5️⃣ 🚚 Atendimento / Prazo
-6️⃣ 💰 Valor do serviço
-
-*📌 Opções extras:*
-7️⃣ Continuar para atendimento
-8️⃣ Encerrar atendimento
-`,
-    opcoes: {
-      1: "🔧 O desbloqueio RGH3 permite rodar jogos direto do HD interno ou externo, sem precisar comprar jogos originais.\nCom ele você também pode:\n\n* Jogar emuladores\n* Instalar apps e homebrews\n* Personalizar o console\n* Aproveitar muito mais recursos!\n\n${instrucoesVoltarAoMenu}",
-      2: "⚙️ Para fazer o desbloqueio, é necessário:\n\n* Ter um Xbox 360 fabricado até 2014\n* Um HD interno, externo ou pendrive de pelo menos 16GB\n\n⚠️ Sem armazenamento não é possível copiar e nem jogar os games.\n\n${instrucoesVoltarAoMenu}",
-      // Removida a instrução daqui para que seja adicionada no final da lista de jogos
-      3: "🎮 Tenho uma lista atualizada de jogos para instalação:",
-      4: "🌐 Não é recomendado jogar online com Xbox desbloqueado, pois existe risco de banimento da Xbox Live.\n🚫 O desbloqueio é ideal para jogar offline e aproveitar jogos direto do HD.\n\n${instrucoesVoltarAoMenu}",
-      5: "🚚 Não atendo a domicílio.\n📍 O cliente deve trazer o console no meu endereço.\n\n⏱️ O prazo de entrega é em média 24 horas.\n\n${instrucoesVoltarAoMenu}",
-      6: "💰 O desbloqueio RGH3 custa R$ 150,00.\nO valor já inclui:\n\n✅ Limpeza interna\n✅ Troca da pasta térmica\n✅ Instalação de 15 jogos da minha lista\n\n${instrucoesVoltarAoMenu}",
-    },
   },
 };
