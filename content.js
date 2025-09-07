@@ -4,9 +4,17 @@ const instrucoesReiniciarOuEncerrar = `_(digite 0️⃣ para reiniciar, ou 9️�
 module.exports = {
   instrucoesReiniciarOuEncerrar,
   saudacao: {
+    // Mensagem de boas-vindas do fluxo principal
     inicio:
-      "👋 Olá! Bem-vindo à *Da Hora Games*! \n\nPara começarmos, escolha uma das opções abaixo para tirar suas dúvidas:",
+      "👋 Olá! Seja bem-vindo ao *CHATBOT DA HORA GAMES*! \n\nPara darmos início, me diga o seu *nome* e *sobrenome*?",
+    // Mensagem de reinício do fluxo principal
     reiniciado:
+      "🔄 Fluxo reiniciado! \n\n👋 Olá! Seja bem-vindo ao *CHATBOT DA HORA GAMES*! \n\nPara darmos início, me diga o seu *nome* e *sobrenome*?",
+    // Mensagem de boas-vindas do FAQ
+    faqInicio:
+      "👋 Olá! Bem-vindo à *Da Hora Games*! \n\nPara começarmos, escolha uma das opções abaixo para tirar suas dúvidas:",
+    // Mensagem de reinício do FAQ
+    faqReiniciado:
       "🔄 Fluxo reiniciado! \n\n👋 Olá! Bem-vindo à *Da Hora Games*! \n\nPara começarmos, escolha uma das opções abaixo para tirar suas dúvidas:",
     finalizado: "🚫 Atendimento finalizado. Obrigado! 🙏",
     encerrado: "👋 Atendimento encerrado. Esperamos te ver em breve! 🙏",

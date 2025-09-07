@@ -143,7 +143,7 @@ client.on("message", async (msg) => {
     }
     await sendWithTypingDelay(
       chatId,
-      content.saudacao.reiniciado + content.faq.menu
+      content.saudacao.faqReiniciado + content.faq.menu
     );
     return;
   }
@@ -169,7 +169,7 @@ client.on("message", async (msg) => {
         await supabase.from("sessions").update(session).eq("chatId", chatId);
         await sendWithTypingDelay(
           chatId,
-          content.saudacao.inicio + content.faq.menu
+          content.saudacao.faqInicio + content.faq.menu
         );
         return;
       }
@@ -199,13 +199,11 @@ client.on("message", async (msg) => {
       return;
     } else if (userMessage === "2") {
       // Opção 2: Iniciar um novo pedido
-      session.stage = 0;
+      session.stage = -1;
       session.data = {}; // Limpa os dados da sessão anterior
-      const serviceId = `OS-${uuidv4().substring(0, 8).toUpperCase()}`;
-      session.data.serviceId = serviceId; // Gera um novo ID para o novo pedido
       await sendWithTypingDelay(
         chatId,
-        content.saudacao.reiniciado + content.faq.menu
+        content.saudacao.faqReiniciado + content.faq.menu
       );
       await supabase.from("sessions").update(session).eq("chatId", chatId);
       return;
@@ -237,7 +235,7 @@ client.on("message", async (msg) => {
       return;
     }
     session = newSession;
-    await sendWithTypingDelay(chatId, content.saudacao.inicio);
+    await sendWithTypingDelay(chatId, content.saudacao.faqInicio);
     await sendWithTypingDelay(chatId, content.faq.menu);
     return;
   }
@@ -253,7 +251,7 @@ client.on("message", async (msg) => {
         session.stage = 0; // Inicia o fluxo principal
         const serviceId = `OS-${uuidv4().substring(0, 8).toUpperCase()}`;
         session.data.serviceId = serviceId; // Gera um novo ID
-        await sendWithTypingDelay(chatId, content.saudacao.inicio);
+        await sendWithTypingDelay(chatId, content.saudacao.inicio); // Mensagem que pede o nome
       } else if (userMessage === "8") {
         await supabase.from("sessions").delete().eq("chatId", chatId);
         await sendWithTypingDelay(chatId, content.saudacao.finalizado);
@@ -394,10 +392,7 @@ client.on("message", async (msg) => {
 
       // 3. Valida o limite de jogos após a limpeza
       if (numerosEscolhidos.length === 0 || numerosEscolhidos.length > 15) {
-        await sendWithTypingDelay(
-          chatId,
-          content.erros.jogosInvalidos // Use uma mensagem clara sobre o limite
-        );
+        await sendWithTypingDelay(chatId, content.erros.jogosInvalidos); // Use uma mensagem clara sobre o limite
         break;
       }
 
