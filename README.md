@@ -9,6 +9,7 @@ O sistema foi desenvolvido para a loja **Da Hora Games**, permitindo que cliente
 ## 🚀 Funcionalidades
 
 - Atendimento automatizado via **WhatsApp**
+- Seção FAQ para dúvidas do cliente
 - Fluxo interativo com perguntas e respostas
 - Geração de **QR Code** para login
 - Armazenamento de sessões e pedidos no **Supabase**
@@ -106,6 +107,9 @@ railway up
 ## 👨‍💻 Autor
 
 - Projeto desenvolvido por Elton Sousa 🚀
+  Referencias:
+  - Gemini
+  - ChatGPT
 - 📧 Email: eltonsousadesigner@gmail.com
 
 - 📍 Localização: Brasil
