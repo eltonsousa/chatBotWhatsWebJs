@@ -4,6 +4,7 @@ const instrucoesVoltarAoMenu = `\n\n_(digite 0️⃣ para voltar ao menu)_`;
 
 module.exports = {
   instrucoesReiniciarOuEncerrar,
+  instrucoesVoltarAoMenu, // Agora a constante é exportada corretamente
   saudacao: {
     inicio:
       "👋 Olá! Seja bem-vindo ao *CHATBOT DA HORA GAMES*! \n\nPara darmos início, me diga o seu *nome* e *sobrenome*?",
@@ -47,7 +48,7 @@ Com ele você também pode:
 * Um HD interno, externo ou pendrive de pelo menos 16GB
 
 ⚠️ Sem armazenamento não é possível copiar e nem jogar os games.${instrucoesVoltarAoMenu}`,
-      3: "🎮 Tenho uma lista atualizada de jogos para instalação:", // Este texto será o "cabeçalho"
+      3: "🎮 Tenho uma lista atualizada de jogos para instalação:",
       4: `🌐 Não é recomendado jogar online com Xbox desbloqueado, pois existe risco de banimento da Xbox Live.
 🚫 O desbloqueio é ideal para jogar offline e aproveitar jogos direto do HD.${instrucoesVoltarAoMenu}`,
       5: `🚚 Não atendo a domicílio.

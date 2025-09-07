@@ -250,7 +250,6 @@ client.on("message", async (msg) => {
         for (const key in config.jogos) {
           listaJogos += `*${key}.* ${config.jogos[key]}\n`;
         }
-        // Concatena o texto base, a lista de jogos e a instrução de retorno
         const mensagemCompleta = `${content.faq.opcoes[userMessage]}\n\n${listaJogos}${content.instrucoesVoltarAoMenu}`;
         await sendWithTypingDelay(chatId, mensagemCompleta);
         session.stage = -2; // Move para o novo estágio de espera
