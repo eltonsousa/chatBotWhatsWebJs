@@ -1,19 +1,18 @@
-// content.js
 const instrucoesReiniciarOuEncerrar = `_(digite 0️⃣ para reiniciar, ou 9️⃣ para encerrar)_`;
 const instrucoesVoltarAoMenu = `\n\n_(digite 0️⃣ para voltar ao menu)_`;
 
 module.exports = {
   instrucoesReiniciarOuEncerrar,
-  instrucoesVoltarAoMenu, // Agora a constante é exportada corretamente
+  instrucoesVoltarAoMenu,
   saudacao: {
     inicio:
       "👋 Olá! Seja bem-vindo ao *CHATBOT DA HORA GAMES*! \n\nPara darmos início, me diga o seu *nome* e *sobrenome*?",
     reiniciado:
       "🔄 Fluxo reiniciado! \n\n👋 Olá! Seja bem-vindo ao *CHATBOT DA HORA GAMES*! \n\nPara darmos início, me diga o seu *nome* e *sobrenome*?",
     faqInicio:
-      "👋 Olá! Bem-vindo à *Da Hora Games*! \n\nPara começarmos, escolha uma das opções abaixo para tirar suas dúvidas:",
+      "👋 Olá! Bem-vindo à *Da Hora Games*! \n\nPara iniciarmos, escolha uma das opções abaixo para tirar suas dúvidas:\n",
     faqReiniciado:
-      "🔄 Fluxo reiniciado! \n\n👋 Olá! Bem-vindo à *Da Hora Games*! \n\nPara começarmos, escolha uma das opções abaixo para tirar suas dúvidas:",
+      "🔄 Fluxo reiniciado! \n\n👋 Olá! Bem-vindo à *Da Hora Games*! \n\nPara iniciarmos, escolha uma das opções abaixo para tirar suas dúvidas:\n",
     finalizado: "🚫 Atendimento finalizado. Obrigado! 🙏",
     encerrado: "👋 Atendimento encerrado. Esperamos te ver em breve! 🙏",
     retorno: (nome) =>
@@ -22,11 +21,11 @@ module.exports = {
   },
   faq: {
     menu: `
-*🟢 Menu de Dúvidas - Xbox 360 (RGH3)*
-1️⃣ ❓ O que é RGH3?
+*🟢 Dúvidas sobre desbloqueio Xbox 360*
+1️⃣ ❓ O que é desbloqueio RGH 3.0?
 2️⃣ ⚙️ Requisitos
 3️⃣ 🎮 Lista de jogos
-4️⃣ 🌐 Jogar online
+4️⃣ 🌐 Posso jogar online?
 5️⃣ 🚚 Atendimento / Prazo
 6️⃣ 💰 Valor do serviço
 
@@ -44,14 +43,14 @@ Com ele você também pode:
 * Aproveitar muito mais recursos!${instrucoesVoltarAoMenu}`,
       2: `⚙️ Para fazer o desbloqueio, é necessário:
 
-* Ter um Xbox 360 fabricado até 2014
-* Um HD interno, externo ou pendrive de pelo menos 16GB
+* Ter um Xbox 360 com fabricacão até 2014
+* Um HD interno, externo ou pendrive de pelo menos 32gb ou +
 
 ⚠️ Sem armazenamento não é possível copiar e nem jogar os games.${instrucoesVoltarAoMenu}`,
-      3: "🎮 Tenho uma lista atualizada de jogos para instalação:",
-      4: `🌐 Não é recomendado jogar online com Xbox desbloqueado, pois existe risco de banimento da Xbox Live.
+      3: "🎮 Aqui está minha lista de jogos:",
+      4: `🌐 Há possibilidade usando servidores furtivos (pesquise no Youtube). O Xbox perde o acesso a Xbox Live para evitar banimento da sua conta.
 🚫 O desbloqueio é ideal para jogar offline e aproveitar jogos direto do HD.${instrucoesVoltarAoMenu}`,
-      5: `🚚 Não atendo a domicílio.
+      5: `🚚 Não atendemos a domicílio.
 📍 O cliente deve trazer o console no meu endereço.
 
 ⏱️ O prazo de entrega é em média 24 horas.${instrucoesVoltarAoMenu}`,
