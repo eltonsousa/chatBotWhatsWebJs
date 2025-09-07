@@ -1,18 +1,66 @@
-// content.js
 const instrucoesReiniciarOuEncerrar = `_(digite 0️⃣ para reiniciar, ou 9️⃣ para encerrar)_`;
+const instrucoesVoltarAoMenu = `\n\n_(digite 0️⃣ para voltar ao menu)_`;
 
 module.exports = {
   instrucoesReiniciarOuEncerrar,
+  instrucoesVoltarAoMenu,
   saudacao: {
     inicio:
       "👋 Olá! Seja bem-vindo ao *CHATBOT DA HORA GAMES*! \n\nPara darmos início, me diga o seu *nome* e *sobrenome*?",
     reiniciado:
       "🔄 Fluxo reiniciado! \n\n👋 Olá! Seja bem-vindo ao *CHATBOT DA HORA GAMES*! \n\nPara darmos início, me diga o seu *nome* e *sobrenome*?",
+    faqInicio:
+      "👋 Olá! Bem-vindo à *Da Hora Games*! \n\nPara iniciarmos, escolha uma das opções abaixo para tirar suas dúvidas:\n",
+    faqReiniciado:
+      "🔄 Fluxo reiniciado! \n\n👋 Olá! Bem-vindo à *Da Hora Games*! \n\nPara iniciarmos, escolha uma das opções abaixo para tirar suas dúvidas:\n",
     finalizado: "🚫 Atendimento finalizado. Obrigado! 🙏",
     encerrado: "👋 Atendimento encerrado. Esperamos te ver em breve! 🙏",
     retorno: (nome) =>
       `👋 Olá novamente, ${nome}! O que você gostaria de fazer?\n\n1️⃣ Ver resumo do último pedido\n2️⃣ Iniciar um novo pedido\n\n_(digite 9️⃣ para encerrar)_`,
     retornoAposResumo: `Você gostaria de:\n\n2️⃣ Iniciar um novo pedido\n9️⃣ Encerrar o atendimento`,
+  },
+  faq: {
+    menu: `
+*🟢 Dúvidas sobre desbloqueio Xbox 360*
+1️⃣ ❓ O que é desbloqueio RGH 3.0?
+2️⃣ ⚙️ Requisitos
+3️⃣ 🎮 Lista de jogos
+4️⃣ 🌐 Posso jogar online?
+5️⃣ 🚚 Atendimento / Prazo
+6️⃣ 💰 Valor do serviço
+
+*📌 Opções extras:*
+7️⃣ Continuar para atendimento
+8️⃣ Encerrar atendimento
+`,
+    opcoes: {
+      1: `🔧 O desbloqueio RGH3 permite rodar jogos direto do HD interno ou externo, sem precisar comprar jogos originais.
+Com ele você também pode:
+
+* Jogar emuladores
+* Instalar apps e homebrews
+* Personalizar o console
+* Aproveitar muito mais recursos!${instrucoesVoltarAoMenu}`,
+      2: `⚙️ Para fazer o desbloqueio, é necessário:
+
+* Ter um Xbox 360 com fabricacão até 2014
+* Um HD interno, externo ou pendrive de pelo menos 32gb ou +
+
+⚠️ Sem armazenamento não é possível copiar e nem jogar os games.${instrucoesVoltarAoMenu}`,
+      3: "🎮 Aqui está minha lista de jogos:",
+      4: `🌐 Há possibilidade usando servidores furtivos (pesquise no Youtube). O Xbox perde o acesso a Xbox Live para evitar banimento da sua conta.
+🚫 O desbloqueio é ideal para jogar offline e aproveitar jogos direto do HD.${instrucoesVoltarAoMenu}`,
+      5: `🚚 Não atendemos a domicílio.
+📍 O cliente deve trazer o console no meu endereço.
+
+⏱️ O prazo de entrega é em média 24 horas.${instrucoesVoltarAoMenu}`,
+      6: `💰 O desbloqueio RGH3 custa R$ 150,00.
+O valor já inclui:
+
+✅ Limpeza interna
+✅ Troca da pasta térmica
+✅ Instalação de 15 jogos da minha lista${instrucoesVoltarAoMenu}`,
+    },
   },
   pedidos: {
     nome: (nome) =>
@@ -41,6 +89,9 @@ module.exports = {
     simNaoInvalido: "❌ Opção inválida. Responda:\n\n1️⃣ Sim\n2️⃣ Não",
     opcaoRetornoInvalida:
       "❌ Opção inválida. Escolha:\n\n1️⃣ Ver resumo\n2️⃣ Iniciar um novo pedido",
+    opcaoFaqInvalida:
+      "❌ Opção inválida. Escolha entre 1️⃣ e 8️⃣ ou 0️⃣ para voltar.",
+    faqNaoZero: "❌ Por favor, digite 0️⃣ para voltar ao menu.",
   },
   opcoes: {
     modelo: "1️⃣ Fat\n2️⃣ Slim\n3️⃣ Super Slim",

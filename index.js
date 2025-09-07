@@ -1,6 +1,11 @@
+////////////////////////////////////////////////////////////////////////////////
+// index.js
+////////////////////////////////////////////////////////////////////////////////
+const express = require("express");
+const QRCode = require("qrcode");
+
 const { v4: uuidv4 } = require("uuid"); // Gera ID
 const { Client, LocalAuth } = require("whatsapp-web.js");
-const qrcode = require("qrcode-terminal");
 const { createClient } = require("@supabase/supabase-js");
 require("dotenv").config();
 
@@ -45,18 +50,66 @@ const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+////////////////////////////////////////////////////////////////////////////////
 // Inicializa o cliente do WhatsApp
 const client = new Client({
   authStrategy: new LocalAuth(),
-  puppeteer: { headless: true },
+  puppeteer: {
+    headless: true,
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-accelerated-2d-canvas",
+      "--no-first-run",
+      "--no-zygote",
+      "--single-process",
+      "--disable-gpu",
+    ],
+  },
 });
 
+// Log quando o bot estiver pronto
+client.on("ready", () => {
+  logInfo("🤖 CHATBOT está online!");
+});
+
+// Rota para exibir QR Code
+let latestQR = null;
 client.on("qr", (qr) => {
-  qrcode.generate(qr, { small: true });
+  latestQR = qr;
+  console.log("⚡ Novo QR gerado. Acesse /qr para escanear.");
 });
 
-logInfo("🤖 CHATBOT está online!");
+////////////////////////////////////////////////////////////////////////////////
+// Servidor Express
+const app = express();
 
+// rota de healthcheck
+app.get("/", (req, res) => {
+  res.send("OK");
+});
+
+// rota do QR Code
+app.get("/qr", async (req, res) => {
+  if (!latestQR) {
+    return res.send("Nenhum QR disponível. Aguarde o bot gerar um novo.");
+  }
+  const qrImage = await QRCode.toDataURL(latestQR);
+  res.type("html");
+  res.send(
+    `<h2>Escaneie o QR Code abaixo com seu WhatsApp:</h2><br><img src="${qrImage}" />`
+  );
+});
+
+// 🚀 Usa a porta definida pelo Railway
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🌍 Servidor rodando na porta ${PORT}`);
+});
+////////////////////////////////////////////////////////////////////////////////
+
+// Fluxo de mensagens
 client.on("message", async (msg) => {
   const chatId = msg.from;
   const userMessage = msg.body.trim();
@@ -73,7 +126,7 @@ client.on("message", async (msg) => {
     return;
   }
 
-  // --- CORREÇÃO: Lógica de encerramento e reinício no topo ---
+  // --- Lógica de encerramento e reinício no topo ---
   if (userMessage === "9") {
     if (session) {
       await supabase.from("sessions").delete().eq("chatId", chatId);
@@ -84,18 +137,17 @@ client.on("message", async (msg) => {
 
   if (userMessage === "0") {
     if (session) {
-      session.stage = 0;
+      session.stage = -1;
       session.data = {}; // Limpa os dados da sessão anterior
-      const serviceId = `OS-${uuidv4().substring(0, 8).toUpperCase()}`; // reduz o ID para oito caracteres
-      session.data.serviceId = serviceId; // Gera um novo ID para o novo pedido
       await supabase.from("sessions").update(session).eq("chatId", chatId);
-      await sendWithTypingDelay(chatId, content.saudacao.reiniciado);
-    } else {
-      await sendWithTypingDelay(chatId, content.saudacao.reiniciado);
     }
+    await sendWithTypingDelay(
+      chatId,
+      content.saudacao.faqReiniciado + content.faq.menu
+    );
     return;
   }
-  // --- FIM DA CORREÇÃO ---
+  // --- FIM DA LÓGICA DE ENCERRAMENTO E REINÍCIO ---
 
   // Se a sessão existir e estiver no estágio final (8)
   if (session && session.stage === 8) {
@@ -112,10 +164,13 @@ client.on("message", async (msg) => {
           chatId,
           "⚠️ Não foi possível encontrar seu último pedido. Por favor, inicie um novo atendimento."
         );
-        session.stage = 0;
+        session.stage = -1;
         session.data = {};
         await supabase.from("sessions").update(session).eq("chatId", chatId);
-        await sendWithTypingDelay(chatId, content.saudacao.inicio);
+        await sendWithTypingDelay(
+          chatId,
+          content.saudacao.faqInicio + content.faq.menu
+        );
         return;
       }
 
@@ -144,11 +199,12 @@ client.on("message", async (msg) => {
       return;
     } else if (userMessage === "2") {
       // Opção 2: Iniciar um novo pedido
-      session.stage = 0;
+      session.stage = -1;
       session.data = {}; // Limpa os dados da sessão anterior
-      const serviceId = `OS-${uuidv4().substring(0, 8).toUpperCase()}`;
-      session.data.serviceId = serviceId; // Gera um novo ID para o novo pedido
-      await sendWithTypingDelay(chatId, content.saudacao.reiniciado);
+      await sendWithTypingDelay(
+        chatId,
+        content.saudacao.faqReiniciado + content.faq.menu
+      );
       await supabase.from("sessions").update(session).eq("chatId", chatId);
       return;
     } else {
@@ -161,16 +217,15 @@ client.on("message", async (msg) => {
     }
   }
 
-  // Se a sessão não existir, cria uma nova no banco de dados
+  // Se a sessão não existir, cria uma nova no banco de dados com o stage -1 (FAQ)
   if (!session) {
-    const serviceId = `OS-${uuidv4().substring(0, 8).toUpperCase()}`; // Gera um ID único no início da sessão
     const { data: newSession, error: insertError } = await supabase
       .from("sessions")
       .insert([
         {
           chatId: chatId,
-          stage: 0,
-          data: { serviceId: serviceId }, // Armazena o ID na sessão
+          stage: -1, // Novo estágio inicial para o FAQ
+          data: {},
         },
       ])
       .select()
@@ -180,13 +235,51 @@ client.on("message", async (msg) => {
       return;
     }
     session = newSession;
-    await sendWithTypingDelay(chatId, content.saudacao.inicio);
+    await sendWithTypingDelay(chatId, content.saudacao.faqInicio);
+    await sendWithTypingDelay(chatId, content.faq.menu);
     return;
   }
 
   // --- LÓGICA DO FLUXO PRINCIPAL ---
   switch (session.stage) {
-    case 0:
+    case -1: // Estágio do menu principal do FAQ
+      if (userMessage === "0") {
+        await sendWithTypingDelay(chatId, content.faq.menu);
+      } else if (userMessage === "3") {
+        let listaJogos = "";
+        for (const key in config.jogos) {
+          listaJogos += `*${key}.* ${config.jogos[key]}\n`;
+        }
+        const mensagemCompleta = `${content.faq.opcoes[userMessage]}\n\n${listaJogos}${content.instrucoesVoltarAoMenu}`;
+        await sendWithTypingDelay(chatId, mensagemCompleta);
+        session.stage = -2; // Move para o novo estágio de espera
+      } else if (userMessage in content.faq.opcoes) {
+        // Envia a resposta das outras opções do FAQ, que já contêm a instrução de retorno
+        await sendWithTypingDelay(chatId, content.faq.opcoes[userMessage]);
+        session.stage = -2; // Move para o novo estágio de espera
+      } else if (userMessage === "7") {
+        session.stage = 0; // Inicia o fluxo principal
+        const serviceId = `OS-${uuidv4().substring(0, 8).toUpperCase()}`;
+        session.data.serviceId = serviceId; // Gera um novo ID
+        await sendWithTypingDelay(chatId, content.saudacao.inicio); // Mensagem que pede o nome
+      } else if (userMessage === "8") {
+        await supabase.from("sessions").delete().eq("chatId", chatId);
+        await sendWithTypingDelay(chatId, content.saudacao.finalizado);
+      } else {
+        await sendWithTypingDelay(chatId, content.erros.opcaoFaqInvalida);
+      }
+      break;
+
+    case -2: // Novo estágio para quando uma resposta do FAQ é exibida
+      if (userMessage === "0") {
+        session.stage = -1; // Retorna ao menu do FAQ
+        await sendWithTypingDelay(chatId, content.faq.menu);
+      } else {
+        await sendWithTypingDelay(chatId, content.erros.faqNaoZero);
+      }
+      break;
+
+    case 0: // Pedir o nome
       session.data.nome = userMessage;
       session.stage = 1;
       await sendWithTypingDelay(
@@ -195,7 +288,7 @@ client.on("message", async (msg) => {
       );
       break;
 
-    case 1:
+    case 1: // Pedir e-mail
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(userMessage)) {
         await sendWithTypingDelay(chatId, content.erros.emailInvalido);
@@ -206,13 +299,13 @@ client.on("message", async (msg) => {
       await sendWithTypingDelay(chatId, content.pedidos.email);
       break;
 
-    case 2:
+    case 2: // Pedir endereço
       session.data.endereco = userMessage;
       session.stage = 3;
       await sendWithTypingDelay(chatId, content.pedidos.endereco);
       break;
 
-    case 3:
+    case 3: // Pedir modelo
       if (!["1", "2", "3"].includes(userMessage)) {
         await sendWithTypingDelay(
           chatId,
@@ -230,7 +323,7 @@ client.on("message", async (msg) => {
       await sendWithTypingDelay(chatId, content.pedidos.ano);
       break;
 
-    case 4:
+    case 4: // Pedir ano
       const ano = parseInt(userMessage);
       if (isNaN(ano) || ano < 2007 || ano > 2015) {
         await sendWithTypingDelay(chatId, content.erros.anoInvalido);
@@ -247,7 +340,7 @@ client.on("message", async (msg) => {
       }
       break;
 
-    case 41:
+    case 41: // Confirmação do ano 2015
       if (userMessage === "1") {
         session.stage = 5;
         await sendWithTypingDelay(chatId, content.pedidos.armazenamento);
@@ -257,7 +350,7 @@ client.on("message", async (msg) => {
       }
       break;
 
-    case 5:
+    case 5: // Pedir armazenamento
       if (!["1", "2", "3", "4"].includes(userMessage)) {
         await sendWithTypingDelay(
           chatId,
@@ -297,7 +390,7 @@ client.on("message", async (msg) => {
       );
       break;
 
-    case 51:
+    case 51: // Confirmação de sem armazenamento
       if (userMessage === "1") {
         session.data.tipo_servico = "Somente desbloqueio";
         session.stage = 7;
@@ -308,9 +401,12 @@ client.on("message", async (msg) => {
       }
       break;
 
-    case 6:
+    case 6: // Escolher jogos
       const jogosOpcoes = config.jogos;
-      let numerosEscolhidos = userMessage.split(",").map((n) => n.trim());
+      let numerosEscolhidos = userMessage
+        .split(",")
+        .map((n) => n.trim())
+        .filter((n) => n !== "");
 
       if (numerosEscolhidos.length === 0 || numerosEscolhidos.length > 15) {
         await sendWithTypingDelay(chatId, content.erros.jogosInvalidos);
@@ -334,7 +430,7 @@ client.on("message", async (msg) => {
       await sendWithTypingDelay(chatId, content.pedidos.localizacao);
       break;
 
-    case 7:
+    case 7: // Confirmação e resumo
       if (!["1", "2"].includes(userMessage)) {
         await sendWithTypingDelay(chatId, content.erros.simNaoInvalido);
         break;
@@ -407,10 +503,7 @@ client.on("message", async (msg) => {
         chatId,
         content.pedidos.concluido(session.data.nome)
       );
-
-      // ADICIONADO: Atraso de 1.5 segundos para evitar que a mensagem de retorno seja disparada automaticamente
       await new Promise((resolve) => setTimeout(resolve, 1500));
-
       break;
   }
 
