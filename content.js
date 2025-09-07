@@ -4,16 +4,12 @@ const instrucoesReiniciarOuEncerrar = `_(digite 0️⃣ para reiniciar, ou 9️�
 module.exports = {
   instrucoesReiniciarOuEncerrar,
   saudacao: {
-    // Mensagem de boas-vindas do fluxo principal
     inicio:
       "👋 Olá! Seja bem-vindo ao *CHATBOT DA HORA GAMES*! \n\nPara darmos início, me diga o seu *nome* e *sobrenome*?",
-    // Mensagem de reinício do fluxo principal
     reiniciado:
       "🔄 Fluxo reiniciado! \n\n👋 Olá! Seja bem-vindo ao *CHATBOT DA HORA GAMES*! \n\nPara darmos início, me diga o seu *nome* e *sobrenome*?",
-    // Mensagem de boas-vindas do FAQ
     faqInicio:
       "👋 Olá! Bem-vindo à *Da Hora Games*! \n\nPara começarmos, escolha uma das opções abaixo para tirar suas dúvidas:",
-    // Mensagem de reinício do FAQ
     faqReiniciado:
       "🔄 Fluxo reiniciado! \n\n👋 Olá! Bem-vindo à *Da Hora Games*! \n\nPara começarmos, escolha uma das opções abaixo para tirar suas dúvidas:",
     finalizado: "🚫 Atendimento finalizado. Obrigado! 🙏",
@@ -74,6 +70,7 @@ module.exports = {
       "❌ Opção inválida. Escolha:\n\n1️⃣ Ver resumo\n2️⃣ Iniciar um novo pedido",
     opcaoFaqInvalida:
       "❌ Opção inválida. Escolha entre 1️⃣ e 8️⃣ ou 0️⃣ para voltar.",
+    faqNaoZero: "❌ Por favor, digite 0️⃣ para voltar ao menu.",
   },
   opcoes: {
     modelo: "1️⃣ Fat\n2️⃣ Slim\n3️⃣ Super Slim",

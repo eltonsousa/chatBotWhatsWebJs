@@ -242,11 +242,13 @@ client.on("message", async (msg) => {
 
   // --- LÓGICA DO FLUXO PRINCIPAL ---
   switch (session.stage) {
-    case -1: // Novo estágio para o FAQ
+    case -1: // Estágio do menu principal do FAQ
       if (userMessage === "0") {
         await sendWithTypingDelay(chatId, content.faq.menu);
       } else if (userMessage in content.faq.opcoes) {
+        // Entra neste bloco para respostas do FAQ (opções 1 a 6)
         await sendWithTypingDelay(chatId, content.faq.opcoes[userMessage]);
+        session.stage = -2; // Move para o novo estágio de espera
       } else if (userMessage === "7") {
         session.stage = 0; // Inicia o fluxo principal
         const serviceId = `OS-${uuidv4().substring(0, 8).toUpperCase()}`;
@@ -260,7 +262,16 @@ client.on("message", async (msg) => {
       }
       break;
 
-    case 0: // Pedir o nome (antigo case 0)
+    case -2: // Novo estágio para quando uma resposta do FAQ é exibida
+      if (userMessage === "0") {
+        session.stage = -1; // Retorna ao menu do FAQ
+        await sendWithTypingDelay(chatId, content.faq.menu);
+      } else {
+        await sendWithTypingDelay(chatId, content.erros.faqNaoZero);
+      }
+      break;
+
+    case 0: // Pedir o nome
       session.data.nome = userMessage;
       session.stage = 1;
       await sendWithTypingDelay(
@@ -269,7 +280,7 @@ client.on("message", async (msg) => {
       );
       break;
 
-    case 1: // Pedir e-mail (antigo case 1)
+    case 1: // Pedir e-mail
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(userMessage)) {
         await sendWithTypingDelay(chatId, content.erros.emailInvalido);
@@ -280,13 +291,13 @@ client.on("message", async (msg) => {
       await sendWithTypingDelay(chatId, content.pedidos.email);
       break;
 
-    case 2: // Pedir endereço (antigo case 2)
+    case 2: // Pedir endereço
       session.data.endereco = userMessage;
       session.stage = 3;
       await sendWithTypingDelay(chatId, content.pedidos.endereco);
       break;
 
-    case 3: // Pedir modelo (antigo case 3)
+    case 3: // Pedir modelo
       if (!["1", "2", "3"].includes(userMessage)) {
         await sendWithTypingDelay(
           chatId,
@@ -304,7 +315,7 @@ client.on("message", async (msg) => {
       await sendWithTypingDelay(chatId, content.pedidos.ano);
       break;
 
-    case 4: // Pedir ano (antigo case 4)
+    case 4: // Pedir ano
       const ano = parseInt(userMessage);
       if (isNaN(ano) || ano < 2007 || ano > 2015) {
         await sendWithTypingDelay(chatId, content.erros.anoInvalido);
@@ -321,7 +332,7 @@ client.on("message", async (msg) => {
       }
       break;
 
-    case 41: // Confirmação do ano 2015 (antigo case 41)
+    case 41: // Confirmação do ano 2015
       if (userMessage === "1") {
         session.stage = 5;
         await sendWithTypingDelay(chatId, content.pedidos.armazenamento);
@@ -331,7 +342,7 @@ client.on("message", async (msg) => {
       }
       break;
 
-    case 5: // Pedir armazenamento (antigo case 5)
+    case 5: // Pedir armazenamento
       if (!["1", "2", "3", "4"].includes(userMessage)) {
         await sendWithTypingDelay(
           chatId,
@@ -371,7 +382,7 @@ client.on("message", async (msg) => {
       );
       break;
 
-    case 51: // Confirmação de sem armazenamento (antigo case 51)
+    case 51: // Confirmação de sem armazenamento
       if (userMessage === "1") {
         session.data.tipo_servico = "Somente desbloqueio";
         session.stage = 7;
@@ -382,21 +393,18 @@ client.on("message", async (msg) => {
       }
       break;
 
-    case 6: // Escolher jogos (antigo case 6)
+    case 6: // Escolher jogos
       const jogosOpcoes = config.jogos;
-      // 1. Limpa a entrada do usuário e separa os números
       let numerosEscolhidos = userMessage
         .split(",")
         .map((n) => n.trim())
-        .filter((n) => n !== ""); // 2. Filtra strings vazias
+        .filter((n) => n !== "");
 
-      // 3. Valida o limite de jogos após a limpeza
       if (numerosEscolhidos.length === 0 || numerosEscolhidos.length > 15) {
-        await sendWithTypingDelay(chatId, content.erros.jogosInvalidos); // Use uma mensagem clara sobre o limite
+        await sendWithTypingDelay(chatId, content.erros.jogosInvalidos);
         break;
       }
 
-      // 4. Valida se todos os números escolhidos são válidos
       const todosValidos = numerosEscolhidos.every((n) => jogosOpcoes[n]);
       if (!todosValidos) {
         await sendWithTypingDelay(
@@ -414,7 +422,7 @@ client.on("message", async (msg) => {
       await sendWithTypingDelay(chatId, content.pedidos.localizacao);
       break;
 
-    case 7: // Confirmação e resumo (antigo case 7)
+    case 7: // Confirmação e resumo
       if (!["1", "2"].includes(userMessage)) {
         await sendWithTypingDelay(chatId, content.erros.simNaoInvalido);
         break;
@@ -487,10 +495,7 @@ client.on("message", async (msg) => {
         chatId,
         content.pedidos.concluido(session.data.nome)
       );
-
-      // ADICIONADO: Atraso de 1.5 segundos para evitar que a mensagem de retorno seja disparada automaticamente
       await new Promise((resolve) => setTimeout(resolve, 1500));
-
       break;
   }
 
