@@ -409,10 +409,9 @@ async function handleFaqMenu(userMessage, session, supabase, client) {
       break;
 
     case -2: // Estágio para quando uma resposta do FAQ é exibida
-      if (userMessage === "0") {
-        session.stage = -1;
-        await sendWithTypingDelay(client, session.chatId, content.faq.menu);
-      } else {
+      // Apenas a lógica para voltar ao menu (agora 0) e encerrar (9)
+      // é necessária aqui.
+      if (userMessage !== "0") {
         await sendWithTypingDelay(
           client,
           session.chatId,
