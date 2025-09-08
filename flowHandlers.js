@@ -244,9 +244,13 @@ const attendantFlowMap = {
 
     const { error } = await supabase.from("pedidos").insert([
       {
-        ...pedidoData,
-        ano: ano,
-        armazenamento: armazenamento,
+        service_id: session.data.serviceId,
+        nome: session.data.nome,
+        email: session.data.email,
+        endereco: session.data.endereco,
+        modelo: session.data.modelo,
+        ano: session.data.ano,
+        armazenamento: session.data.armazenamento,
         tipo_servico: tipo_servico,
         jogos: jogos,
       },
