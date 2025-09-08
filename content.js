@@ -10,9 +10,9 @@ module.exports = {
     reiniciado:
       "🔄 Fluxo reiniciado! \n\n👋 Olá! Seja bem-vindo ao *CHATBOT DA HORA GAMES*! \n\nPara darmos início, me diga o seu *nome* e *sobrenome*?",
     faqInicio:
-      "👋 Olá! Bem-vindo à *Da Hora Games*! \n\nPara iniciarmos, escolha uma das opções abaixo para tirar suas dúvidas:\n",
+      "👋 Olá! Bem-vindo à *Da Hora Games*! \n\nPara iniciarmos, escolha uma das opções abaixo:\n",
     faqReiniciado:
-      "🔄 Fluxo reiniciado! \n\n👋 Olá! Bem-vindo à *Da Hora Games*! \n\nPara iniciarmos, escolha uma das opções abaixo para tirar suas dúvidas:\n",
+      "🔄 Fluxo reiniciado! \n\n👋 Olá! Bem-vindo à *Da Hora Games*! \n\nPara iniciarmos, escolha uma das opções abaixo:\n",
     finalizado: "🚫 Atendimento finalizado. Obrigado! 🙏",
     encerrado: "👋 Atendimento encerrado. Esperamos te ver em breve! 🙏",
     retorno: (nome) =>
@@ -22,6 +22,7 @@ module.exports = {
   faq: {
     menu: `
 *🟢 Dúvidas sobre desbloqueio Xbox 360*
+
 1️⃣ ❓ O que é desbloqueio RGH 3.0?
 2️⃣ ⚙️ Requisitos
 3️⃣ 🎮 Lista de jogos
@@ -29,12 +30,12 @@ module.exports = {
 5️⃣ 🚚 Atendimento / Prazo
 6️⃣ 💰 Valor do serviço
 
-*📌 Opções extras:*
+*📌 Não tenho dúvidas e quero...:*
 7️⃣ Continuar para atendimento
 8️⃣ Encerrar atendimento
 `,
     opcoes: {
-      1: `🔧 O desbloqueio RGH3 permite rodar jogos direto do HD interno ou externo, sem precisar comprar jogos originais.
+      1: `🔧 O desbloqueio RGH 3.0 permite rodar jogos direto do HD interno ou externo, sem precisar comprar jogos originais.
 Com ele você também pode:
 
 * Jogar emuladores

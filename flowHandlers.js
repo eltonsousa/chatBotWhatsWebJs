@@ -217,16 +217,16 @@ const attendantFlowMap = {
     let resumo = `
 *🆔 ID DO SERVIÇO:* ${session.data.serviceId}
 *📋 RESUMO DO PEDIDO:*
-👤 NOME: ${session.data.nome}
-📧 EMAIL: ${session.data.email}
-🏠 ENDEREÇO: ${session.data.endereco}
-🎮 MODELO: ${session.data.modelo}
-📅 ANO: ${session.data.ano}
-💾 ARMAZENAMENTO: ${session.data.armazenamento}
-🛠️ SERVIÇO: ${session.data.tipo_servico}`;
+*👤 NOME:* ${session.data.nome}
+*📧 EMAIL:* ${session.data.email}
+*🏠 ENDEREÇO:* ${session.data.endereco}
+*🎮 MODELO:* ${session.data.modelo}
+*📅 ANO:* ${session.data.ano}
+*💾 ARMAZENAMENTO:* ${session.data.armazenamento}
+*🛠️ SERVIÇO:* ${session.data.tipo_servico}`;
 
     if (session.data.jogos) {
-      resumo += `\n🎮 JOGOS:`;
+      resumo += `\n*🎮 JOGOS:*`;
       session.data.jogos.forEach((jogo, index) => {
         resumo += `\n${index + 1}. ${jogo}`;
       });
@@ -238,7 +238,7 @@ const attendantFlowMap = {
       await sendWithTypingDelay(
         client,
         session.chatId,
-        `📍 Localização: ${config.localizacao}`
+        `*📍 Localização:* ${config.localizacao}`
       );
     }
 
@@ -297,17 +297,17 @@ const attendantFlowMap = {
 
       let resumo = `
 *📋 RESUMO DO SEU ÚLTIMO PEDIDO:*
-🆔 ID DO SERVIÇO: ${pedido.service_id}
-👤 NOME: ${pedido.nome}
-📧 EMAIL: ${pedido.email}
-🏠 ENDEREÇO: ${pedido.endereco}
-🎮 MODELO: ${pedido.modelo}
-📅 ANO: ${pedido.ano}
-💾 ARMAZENAMENTO: ${pedido.armazenamento}
-🛠️ SERVIÇO: ${pedido.tipo_servico}`;
+*🆔 ID DO SERVIÇO:* ${pedido.service_id}
+*👤 NOME:* ${pedido.nome}
+*📧 EMAIL:* ${pedido.email}
+*🏠 ENDEREÇO:* ${pedido.endereco}
+*🎮 MODELO:* ${pedido.modelo}
+*📅 ANO:* ${pedido.ano}
+*💾 ARMAZENAMENTO:* ${pedido.armazenamento}
+*🛠️ SERVIÇO:* ${pedido.tipo_servico}`;
 
       if (pedido.jogos) {
-        resumo += `\n🎮 JOGOS:`;
+        resumo += `\n*🎮 JOGOS:*`;
         pedido.jogos.forEach((jogo, index) => {
           resumo += `\n${index + 1}. ${jogo}`;
         });
