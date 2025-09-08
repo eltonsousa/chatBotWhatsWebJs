@@ -71,7 +71,11 @@ app.get("/qr", async (req, res) => {
   const qrImage = await QRCode.toDataURL(latestQR);
   res.type("html");
   res.send(
-    `<h2>Escaneie o QR Code abaixo com seu WhatsApp:</h2><br><img src="${qrImage}" />`
+    // `<h2>Escaneie o QR Code abaixo com seu WhatsApp:</h2><br><img src="${qrImage}" />`
+    `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+        <h2>Escaneie o QR Code abaixo com seu WhatsApp:</h2><br>
+        <img src="${qrImage}" />
+    </div>`
   );
 });
 
