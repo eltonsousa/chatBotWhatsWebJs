@@ -15,6 +15,9 @@ const {
   handleAttendantFlow,
 } = require("./flowHandlers.js");
 
+// Importação do arquivo de conteúdo
+const content = require("./content.js");
+
 // Configura o cliente Supabase usando as variáveis de ambiente
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
