@@ -12,7 +12,7 @@ module.exports = {
     faqInicio:
       "👋 Olá! Seja bem-vindo(a) ao *CHATBOT DA HORA GAMES*! \n\nPara iniciarmos, escolha uma das opções abaixo:\n",
     faqReiniciado:
-      "🔄 Fluxo reiniciado! \n\n👋 👋 Olá! Seja bem-vindo(a) ao *CHATBOT DA HORA GAMES*! \n\nPara iniciarmos, escolha uma das opções abaixo:\n",
+      "🔄 Fluxo reiniciado! \n\n👋 Olá! Seja bem-vindo(a) ao *CHATBOT DA HORA GAMES*! \n\nPara iniciarmos, escolha uma das opções abaixo:\n",
     finalizado: "🚫 Atendimento finalizado. Obrigado! 🙏",
     encerrado: "👋 Atendimento encerrado. Esperamos te ver em breve! 🙏",
     retorno: (nome) =>
@@ -53,7 +53,8 @@ _⚠️ Sem armazenamento não é possível copiar e nem jogar os games._${instr
       3: `_🎮 Aqui está minha lista de jogos:_`,
       4: `_🌐 Há possibilidade usando servidores furtivos (pesquise no Youtube). O Xbox perde o acesso a Xbox Live para evitar banimento da sua conta._
 🚫 O desbloqueio é ideal para jogar offline e aproveitar jogos direto do HD.${instrucoesVoltarAoMenu}`,
-      5: `_🚚 Não atendemos a domicílio._
+      5: `*🚚 Não atendemos a domicílio.*
+
 📍 O cliente deve trazer o console no meu endereço.
 
 ⏱️ O prazo de entrega é em média 24 horas.${instrucoesVoltarAoMenu}`,
@@ -71,11 +72,12 @@ O valor já inclui:
       `✅ Obrigado, *${nome}!*\n\n📧 Agora, informe o seu *email*:\n\n${instrucoesReiniciarOuEncerrar}`,
     email: `🏠 Informe o seu *endereço*:\n\n${instrucoesReiniciarOuEncerrar}`,
     endereco: `🎮 Qual o modelo do seu Xbox?\n\n1️⃣ Fat\n2️⃣ Slim\n3️⃣ Super Slim\n\n${instrucoesReiniciarOuEncerrar}`,
-    ano: `📅 Informe o *ano* do console [2007 - 2015]:\n\n${instrucoesReiniciarOuEncerrar}`,
+    ano: `📅 Informe o *ano* do console.
+  Anos aceitos: [2007 - 2015]:\n\n${instrucoesReiniciarOuEncerrar}`,
     armazenamento: `💾 Possui armazenamento?\n\n1️⃣ HD interno\n2️⃣ HD externo\n3️⃣ Pendrive 16GB+\n4️⃣ Não tenho\n\n${instrucoesReiniciarOuEncerrar}`,
     localizacao: `📍 Deseja receber o link da nossa localização?\n\n1️⃣ Sim\n2️⃣ Não\n\n${instrucoesReiniciarOuEncerrar}`,
     concluido: (nome) =>
-      `✅ Atendimento concluído! Obrigado, *${nome}*, até breve! 🙏`,
+      `✅ Atendimento concluído! Obrigado *${nome}*, até breve! 🙏`,
     avisoAno2015: `⚠️ Aparelhos de *2015 não podem ser desbloqueados definitivamente!*.\n\nDeseja continuar?\n\n1️⃣ Sim\n2️⃣ Não\n\n${instrucoesReiniciarOuEncerrar}`,
     avisoSemArmazenamento: `⚠️ Sem armazenamento não será possível jogar nem copiar jogos!\n\nO que você deseja:\n\n1️⃣ Continuar apenas com desbloqueio\n2️⃣ Finalizar\n\n${instrucoesReiniciarOuEncerrar}`,
     escolherJogos: (limiteJogos) =>
@@ -84,7 +86,7 @@ O valor já inclui:
   erros: {
     emailInvalido: `❌ Formato de email inválido! 
       Por favor, digite um email válido.
-      Ex.: _seuemail@gmail.com_`,
+      Ex.:_seuemail@gmail.com_`,
     opcaoInvalida: (opcoes) => `❌ Opção inválida. Escolha:\n${opcoes}`,
     anoInvalido: "❌ Ano inválido! Digite o ano de 2007 a 2015.",
     jogosInvalidos:

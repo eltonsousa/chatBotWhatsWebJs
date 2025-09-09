@@ -215,20 +215,20 @@ const attendantFlowMap = {
     session.data.tipo_servico = tipo_servico;
 
     let resumo = `
-*🆔 ID DO SERVIÇO:* ${session.data.serviceId}
+*🆔 ID DO SERVIÇO:* _${session.data.serviceId}_
 *📋 RESUMO DO PEDIDO:*
-👤 NOME: ${session.data.nome}
-📧 EMAIL: ${session.data.email}
-🏠 ENDEREÇO: ${session.data.endereco}
-🎮 MODELO: ${session.data.modelo}
-📅 ANO: ${session.data.ano}
-💾 ARMAZENAMENTO: ${session.data.armazenamento}
-🛠️ SERVIÇO: ${session.data.tipo_servico}`;
+👤 NOME: _${session.data.nome}_
+📧 EMAIL: _${session.data.email}_
+🏠 ENDEREÇO: _${session.data.endereco}_
+🎮 MODELO: _${session.data.modelo}_
+📅 ANO: _${session.data.ano}_
+💾 ARMAZENAMENTO: _${session.data.armazenamento}_
+🛠️ SERVIÇO: _${session.data.tipo_servico}_`;
 
     if (session.data.jogos) {
       resumo += `\n🎮 JOGOS:`;
       session.data.jogos.forEach((jogo, index) => {
-        resumo += `\n${index + 1}. ${jogo}`;
+        resumo += `\n_${index + 1}._ _${jogo}_`;
       });
     }
 
@@ -302,19 +302,19 @@ const attendantFlowMap = {
 
       let resumo = `
 *📋 RESUMO DO SEU ÚLTIMO PEDIDO:*
-🆔 ID DO SERVIÇO: ${pedido.service_id}
-👤 NOME: ${pedido.nome}
-📧 EMAIL: ${pedido.email}
-🏠 ENDEREÇO: ${pedido.endereco}
-🎮 MODELO: ${pedido.modelo}
-📅 ANO: ${pedido.ano}
-💾 ARMAZENAMENTO: ${pedido.armazenamento}
-🛠️ SERVIÇO: ${pedido.tipo_servico}`;
+🆔 ID DO SERVIÇO: _${pedido.service_id}_
+👤 NOME: _${pedido.nome}_
+📧 EMAIL: _${pedido.email}_
+🏠 ENDEREÇO: _${pedido.endereco}_
+🎮 MODELO: _${pedido.modelo}_
+📅 ANO: _${pedido.ano}_
+💾 ARMAZENAMENTO: _${pedido.armazenamento}_
+🛠️ SERVIÇO: _${pedido.tipo_servico}_`;
 
       if (pedido.jogos) {
         resumo += `\n🎮 JOGOS:`;
         pedido.jogos.forEach((jogo, index) => {
-          resumo += `\n${index + 1}. ${jogo}`;
+          resumo += `\n_${index + 1}._ _${jogo}_`;
         });
       }
 
