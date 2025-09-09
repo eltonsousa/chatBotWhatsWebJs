@@ -73,7 +73,7 @@ O valor já inclui:
     email: `🏠 Informe o seu *endereço*:\n\n${instrucoesReiniciarOuEncerrar}`,
     endereco: `🎮 Qual o modelo do seu Xbox?\n\n1️⃣ Fat\n2️⃣ Slim\n3️⃣ Super Slim\n\n${instrucoesReiniciarOuEncerrar}`,
     ano: `📅 Informe o *ano* do console.
-  Anos aceitos: [2007 - 2015]:\n\n${instrucoesReiniciarOuEncerrar}`,
+Anos aceitos: [2007 - 2015]:\n\n${instrucoesReiniciarOuEncerrar}`,
     armazenamento: `💾 Possui armazenamento?\n\n1️⃣ HD interno\n2️⃣ HD externo\n3️⃣ Pendrive 16GB+\n4️⃣ Não tenho\n\n${instrucoesReiniciarOuEncerrar}`,
     localizacao: `📍 Deseja receber o link da nossa localização?\n\n1️⃣ Sim\n2️⃣ Não\n\n${instrucoesReiniciarOuEncerrar}`,
     concluido: (nome) =>

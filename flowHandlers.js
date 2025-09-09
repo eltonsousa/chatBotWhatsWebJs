@@ -160,6 +160,9 @@ const attendantFlowMap = {
       .map((n) => n.trim())
       .filter((n) => n !== "");
 
+    // Remover duplicados
+    numerosEscolhidos = [...new Set(numerosEscolhidos)];
+
     if (numerosEscolhidos.length === 0 || numerosEscolhidos.length > 15) {
       await sendWithTypingDelay(
         client,
@@ -271,7 +274,6 @@ const attendantFlowMap = {
     await new Promise((resolve) => setTimeout(resolve, 1500));
   },
   8: async (userMessage, session, supabase, client) => {
-    // 🔹 Novo comportamento: ao retornar, mostra saudação com nome se não digitou opção válida
     if (!userMessage || !["1", "2", "9"].includes(userMessage)) {
       await sendWithTypingDelay(
         client,
@@ -282,7 +284,6 @@ const attendantFlowMap = {
     }
 
     if (userMessage === "1") {
-      // Opção 1: Ver resumo do último pedido
       const { data: pedido, error: pedidoError } = await supabase
         .from("pedidos")
         .select("*")
@@ -326,7 +327,6 @@ const attendantFlowMap = {
       );
       return;
     } else if (userMessage === "2") {
-      // Opção 2: Iniciar um novo pedido
       session.stage = -1;
       session.data = {};
       await sendWithTypingDelay(
@@ -336,7 +336,6 @@ const attendantFlowMap = {
       );
       return;
     } else if (userMessage === "9") {
-      // Encerrar atendimento
       await supabase.from("sessions").delete().eq("chatId", session.chatId);
       session.stage = -1;
       session.data = {};
@@ -360,7 +359,6 @@ const attendantFlowMap = {
   },
 };
 
-// Funções para gerenciar o fluxo principal
 async function handleFaqMenu(userMessage, session, supabase, client) {
   const isValidFaqOption = ["1", "2", "3", "4", "5", "6", "7", "8"].includes(
     userMessage
@@ -394,7 +392,20 @@ async function handleFaqMenu(userMessage, session, supabase, client) {
     session.stage = 0;
     const serviceId = `OS-${uuidv4().substring(0, 8).toUpperCase()}`;
     session.data.serviceId = serviceId;
-    await sendWithTypingDelay(client, session.chatId, content.saudacao.inicio);
+
+    if (session.data.nome) {
+      await sendWithTypingDelay(
+        client,
+        session.chatId,
+        content.saudacao.retorno(session.data.nome)
+      );
+    } else {
+      await sendWithTypingDelay(
+        client,
+        session.chatId,
+        content.saudacao.inicio
+      );
+    }
   } else if (userMessage === "8") {
     await supabase.from("sessions").delete().eq("chatId", session.chatId);
     await sendWithTypingDelay(
