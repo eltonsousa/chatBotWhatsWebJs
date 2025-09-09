@@ -244,7 +244,7 @@ const attendantFlowMap = {
 
     const { error } = await supabase.from("pedidos").insert([
       {
-        service_id: session.data.serviceId, // Mapeamento correto para a coluna do banco
+        service_id: session.data.serviceId,
         nome: session.data.nome,
         email: session.data.email,
         endereco: session.data.endereco,
@@ -271,6 +271,16 @@ const attendantFlowMap = {
     await new Promise((resolve) => setTimeout(resolve, 1500));
   },
   8: async (userMessage, session, supabase, client) => {
+    // 🔹 Novo comportamento: ao retornar, mostra saudação com nome se não digitou opção válida
+    if (!userMessage || !["1", "2", "9"].includes(userMessage)) {
+      await sendWithTypingDelay(
+        client,
+        session.chatId,
+        content.saudacao.retorno(session.data.nome)
+      );
+      return;
+    }
+
     if (userMessage === "1") {
       // Opção 1: Ver resumo do último pedido
       const { data: pedido, error: pedidoError } = await supabase
@@ -325,12 +335,15 @@ const attendantFlowMap = {
         content.saudacao.faqReiniciado + content.faq.menu
       );
       return;
-    } else {
-      // Se o usuário digitar qualquer outra coisa
+    } else if (userMessage === "9") {
+      // Encerrar atendimento
+      await supabase.from("sessions").delete().eq("chatId", session.chatId);
+      session.stage = -1;
+      session.data = {};
       await sendWithTypingDelay(
         client,
         session.chatId,
-        content.saudacao.retorno(session.data.nome)
+        content.saudacao.finalizado
       );
       return;
     }
@@ -349,13 +362,11 @@ const attendantFlowMap = {
 
 // Funções para gerenciar o fluxo principal
 async function handleFaqMenu(userMessage, session, supabase, client) {
-  // Verifica se a opção do usuário é válida (1 a 8)
   const isValidFaqOption = ["1", "2", "3", "4", "5", "6", "7", "8"].includes(
     userMessage
   );
 
   if (!isValidFaqOption) {
-    // Se a opção não for válida, reenvia o menu completo
     await sendWithTypingDelay(
       client,
       session.chatId,
@@ -364,7 +375,6 @@ async function handleFaqMenu(userMessage, session, supabase, client) {
     return;
   }
 
-  // Lógica para as opções válidas
   if (userMessage === "3") {
     let listaJogos = "";
     for (const key in config.jogos) {
@@ -402,10 +412,7 @@ async function handleAttendantFlow(userMessage, session, supabase, client) {
   }
 }
 
-// Nova função principal para tratar todas as mensagens
-// Nova função principal para tratar todas as mensagens
 async function handleMessage(userMessage, session, supabase, client) {
-  // Trata comandos especiais primeiro, independentemente do estágio
   if (userMessage === "9") {
     await attendantFlowMap[9](userMessage, session, supabase, client);
     return;
@@ -422,7 +429,6 @@ async function handleMessage(userMessage, session, supabase, client) {
     return;
   }
 
-  // 🔹 Novo trecho: controlar quando o usuário está dentro de uma resposta do FAQ
   if (session.stage === -2) {
     if (userMessage !== "0") {
       await sendWithTypingDelay(
@@ -432,7 +438,6 @@ async function handleMessage(userMessage, session, supabase, client) {
       );
       return;
     }
-    // Se for "0", volta para o menu do FAQ
     session.stage = -1;
     await sendWithTypingDelay(
       client,
@@ -442,7 +447,6 @@ async function handleMessage(userMessage, session, supabase, client) {
     return;
   }
 
-  // Direciona para o handler de FAQ ou para o fluxo de atendimento
   if (session.stage < 0) {
     await handleFaqMenu(userMessage, session, supabase, client);
   } else {
