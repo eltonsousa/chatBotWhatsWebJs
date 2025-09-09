@@ -403,6 +403,7 @@ async function handleAttendantFlow(userMessage, session, supabase, client) {
 }
 
 // Nova função principal para tratar todas as mensagens
+// Nova função principal para tratar todas as mensagens
 async function handleMessage(userMessage, session, supabase, client) {
   // Trata comandos especiais primeiro, independentemente do estágio
   if (userMessage === "9") {
@@ -413,6 +414,26 @@ async function handleMessage(userMessage, session, supabase, client) {
   if (userMessage === "0") {
     session.stage = -1;
     session.data = {};
+    await sendWithTypingDelay(
+      client,
+      session.chatId,
+      content.saudacao.faqReiniciado + content.faq.menu
+    );
+    return;
+  }
+
+  // 🔹 Novo trecho: controlar quando o usuário está dentro de uma resposta do FAQ
+  if (session.stage === -2) {
+    if (userMessage !== "0") {
+      await sendWithTypingDelay(
+        client,
+        session.chatId,
+        content.erros.faqNaoZero
+      );
+      return;
+    }
+    // Se for "0", volta para o menu do FAQ
+    session.stage = -1;
     await sendWithTypingDelay(
       client,
       session.chatId,
