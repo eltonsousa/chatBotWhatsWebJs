@@ -9,11 +9,7 @@ require("dotenv").config();
 const { logInfo, logError, sendWithTypingDelay } = require("./utils.js");
 
 // Handlers do fluxo de atendimento
-const {
-  handleInitialMessage,
-  handleFaqMenu,
-  handleAttendantFlow,
-} = require("./flowHandlers.js");
+const { handleMessage } = require("./flowHandlers.js");
 
 // Importação do arquivo de conteúdo
 const content = require("./content.js");
@@ -71,11 +67,7 @@ app.get("/qr", async (req, res) => {
   const qrImage = await QRCode.toDataURL(latestQR);
   res.type("html");
   res.send(
-    // `<h2>Escaneie o QR Code abaixo com seu WhatsApp:</h2><br><img src="${qrImage}" />`
-    `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-        <h2>Escaneie o QR Code abaixo com seu WhatsApp:</h2><br>
-        <img src="${qrImage}" />
-    </div>`
+    `<h2>Escaneie o QR Code abaixo com seu WhatsApp:</h2><br><img src="${qrImage}" />`
   );
 });
 
@@ -99,52 +91,36 @@ client.on("message", async (msg) => {
 
   if (selectError && selectError.code !== "PGRST116") {
     logError("Erro ao buscar a sessão", selectError, session);
+    // Em caso de erro, evita processar a mensagem para não gerar mais erros
     return;
   }
 
-  // Lógica de encerramento e reinício no topo
-  if (userMessage === "9") {
-    if (session) {
-      await supabase.from("sessions").delete().eq("chatId", chatId);
-    }
-    await sendWithTypingDelay(client, chatId, content.saudacao.encerrado);
-    return;
-  }
-
-  if (userMessage === "0") {
-    if (session) {
-      session.stage = -1;
-      session.data = {};
-      await supabase.from("sessions").update(session).eq("chatId", chatId);
-    }
+  // Se a sessão não existir, cria uma nova e envia o menu de boas-vindas completo
+  if (!session) {
+    session = {
+      chatId: chatId,
+      stage: -1,
+      data: {},
+    };
     await sendWithTypingDelay(
       client,
       chatId,
-      content.saudacao.faqReiniciado + content.faq.menu
+      content.saudacao.faqInicio + content.faq.menu
     );
-    return;
   }
 
-  // Se a sessão não existir, cria uma nova ou redireciona para o handler inicial
-  if (!session) {
-    session = await handleInitialMessage(chatId, supabase, client);
-    return;
-  }
+  // Delega o tratamento da mensagem para a função principal no flowHandlers
+  await handleMessage(userMessage, session, supabase, client);
 
-  // Direciona para o handler de FAQ ou para o fluxo de atendimento
-  if (session.stage < 0) {
-    await handleFaqMenu(userMessage, session, supabase, client);
-  } else {
-    await handleAttendantFlow(userMessage, session, supabase, client);
-  }
-
-  // Atualiza a sessão no banco de dados
-  const { error: updateError } = await supabase
+  // Usa o upsert para inserir ou atualizar a sessão de forma segura
+  const { error: upsertError } = await supabase
     .from("sessions")
-    .update(session)
-    .eq("chatId", chatId);
-  if (updateError) {
-    logError("Erro ao atualizar a sessão:", updateError, session);
+    .upsert(session);
+
+  if (upsertError) {
+    logError("Erro ao salvar/atualizar a sessão:", upsertError, session);
+  } else {
+    logInfo("Sessão salva/atualizada com sucesso", session);
   }
 });
 

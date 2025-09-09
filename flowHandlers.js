@@ -85,12 +85,12 @@ const attendantFlowMap = {
         content.pedidos.armazenamento
       );
     } else {
+      session.stage = 9; // Vai para o estágio finalizado
       await sendWithTypingDelay(
         client,
         session.chatId,
         content.saudacao.finalizado
       );
-      await supabase.from("sessions").delete().eq("chatId", session.chatId);
     }
   },
   5: async (userMessage, session, supabase, client) => {
@@ -145,12 +145,12 @@ const attendantFlowMap = {
         content.pedidos.localizacao
       );
     } else {
+      session.stage = 9; // Vai para o estágio finalizado
       await sendWithTypingDelay(
         client,
         session.chatId,
         content.saudacao.finalizado
       );
-      await supabase.from("sessions").delete().eq("chatId", session.chatId);
     }
   },
   6: async (userMessage, session, supabase, client) => {
@@ -217,16 +217,16 @@ const attendantFlowMap = {
     let resumo = `
 *🆔 ID DO SERVIÇO:* ${session.data.serviceId}
 *📋 RESUMO DO PEDIDO:*
-*👤 NOME:* ${session.data.nome}
-*📧 EMAIL:* ${session.data.email}
-*🏠 ENDEREÇO:* ${session.data.endereco}
-*🎮 MODELO:* ${session.data.modelo}
-*📅 ANO:* ${session.data.ano}
-*💾 ARMAZENAMENTO:* ${session.data.armazenamento}
-*🛠️ SERVIÇO:* ${session.data.tipo_servico}`;
+👤 NOME: ${session.data.nome}
+📧 EMAIL: ${session.data.email}
+🏠 ENDEREÇO: ${session.data.endereco}
+🎮 MODELO: ${session.data.modelo}
+📅 ANO: ${session.data.ano}
+💾 ARMAZENAMENTO: ${session.data.armazenamento}
+🛠️ SERVIÇO: ${session.data.tipo_servico}`;
 
     if (session.data.jogos) {
-      resumo += `\n*🎮 JOGOS:*`;
+      resumo += `\n🎮 JOGOS:`;
       session.data.jogos.forEach((jogo, index) => {
         resumo += `\n${index + 1}. ${jogo}`;
       });
@@ -238,13 +238,13 @@ const attendantFlowMap = {
       await sendWithTypingDelay(
         client,
         session.chatId,
-        `*📍 Localização:* ${config.localizacao}`
+        `📍 Localização: ${config.localizacao}`
       );
     }
 
     const { error } = await supabase.from("pedidos").insert([
       {
-        service_id: session.data.serviceId,
+        service_id: session.data.serviceId, // Mapeamento correto para a coluna do banco
         nome: session.data.nome,
         email: session.data.email,
         endereco: session.data.endereco,
@@ -287,27 +287,22 @@ const attendantFlowMap = {
         );
         session.stage = -1;
         session.data = {};
-        await sendWithTypingDelay(
-          client,
-          session.chatId,
-          content.saudacao.faqInicio + content.faq.menu
-        );
         return;
       }
 
       let resumo = `
 *📋 RESUMO DO SEU ÚLTIMO PEDIDO:*
-*🆔 ID DO SERVIÇO:* ${pedido.service_id}
-*👤 NOME:* ${pedido.nome}
-*📧 EMAIL:* ${pedido.email}
-*🏠 ENDEREÇO:* ${pedido.endereco}
-*🎮 MODELO:* ${pedido.modelo}
-*📅 ANO:* ${pedido.ano}
-*💾 ARMAZENAMENTO:* ${pedido.armazenamento}
-*🛠️ SERVIÇO:* ${pedido.tipo_servico}`;
+🆔 ID DO SERVIÇO: ${pedido.service_id}
+👤 NOME: ${pedido.nome}
+📧 EMAIL: ${pedido.email}
+🏠 ENDEREÇO: ${pedido.endereco}
+🎮 MODELO: ${pedido.modelo}
+📅 ANO: ${pedido.ano}
+💾 ARMAZENAMENTO: ${pedido.armazenamento}
+🛠️ SERVIÇO: ${pedido.tipo_servico}`;
 
       if (pedido.jogos) {
-        resumo += `\n*🎮 JOGOS:*`;
+        resumo += `\n🎮 JOGOS:`;
         pedido.jogos.forEach((jogo, index) => {
           resumo += `\n${index + 1}. ${jogo}`;
         });
@@ -340,89 +335,63 @@ const attendantFlowMap = {
       return;
     }
   },
+  9: async (userMessage, session, supabase, client) => {
+    await supabase.from("sessions").delete().eq("chatId", session.chatId);
+    session.stage = -1;
+    session.data = {};
+    await sendWithTypingDelay(
+      client,
+      session.chatId,
+      content.saudacao.finalizado
+    );
+  },
 };
 
 // Funções para gerenciar o fluxo principal
-async function handleInitialMessage(chatId, supabase, client) {
-  const { data: newSession, error: insertError } = await supabase
-    .from("sessions")
-    .insert([
-      {
-        chatId: chatId,
-        stage: -1,
-        data: {},
-      },
-    ])
-    .select()
-    .single();
+async function handleFaqMenu(userMessage, session, supabase, client) {
+  // Verifica se a opção do usuário é válida (1 a 8)
+  const isValidFaqOption = ["1", "2", "3", "4", "5", "6", "7", "8"].includes(
+    userMessage
+  );
 
-  if (insertError) {
-    logError("Erro ao criar nova sessão:", insertError);
+  if (!isValidFaqOption) {
+    // Se a opção não for válida, reenvia o menu completo
+    await sendWithTypingDelay(
+      client,
+      session.chatId,
+      content.saudacao.faqInicio + content.faq.menu
+    );
     return;
   }
 
-  await sendWithTypingDelay(
-    client,
-    chatId,
-    content.saudacao.faqInicio + content.faq.menu
-  );
-  return newSession;
-}
-
-async function handleFaqMenu(userMessage, session, supabase, client) {
-  switch (session.stage) {
-    case -1: // Estágio do menu principal do FAQ
-      if (userMessage === "3") {
-        let listaJogos = "";
-        for (const key in config.jogos) {
-          listaJogos += `*${key}.* ${config.jogos[key]}\n`;
-        }
-        const mensagemCompleta = `${content.faq.opcoes[userMessage]}\n\n${listaJogos}${content.instrucoesVoltarAoMenu}`;
-        await sendWithTypingDelay(client, session.chatId, mensagemCompleta);
-        session.stage = -2;
-      } else if (userMessage in content.faq.opcoes) {
-        await sendWithTypingDelay(
-          client,
-          session.chatId,
-          content.faq.opcoes[userMessage]
-        );
-        session.stage = -2;
-      } else if (userMessage === "7") {
-        session.stage = 0;
-        const serviceId = `OS-${uuidv4().substring(0, 8).toUpperCase()}`;
-        session.data.serviceId = serviceId;
-        await sendWithTypingDelay(
-          client,
-          session.chatId,
-          content.saudacao.inicio
-        );
-      } else if (userMessage === "8") {
-        await supabase.from("sessions").delete().eq("chatId", session.chatId);
-        await sendWithTypingDelay(
-          client,
-          session.chatId,
-          content.saudacao.finalizado
-        );
-      } else {
-        await sendWithTypingDelay(
-          client,
-          session.chatId,
-          content.erros.opcaoFaqInvalida
-        );
-      }
-      break;
-
-    case -2: // Estágio para quando uma resposta do FAQ é exibida
-      // Apenas a lógica para voltar ao menu (agora 0) e encerrar (9)
-      // é necessária aqui.
-      if (userMessage !== "0") {
-        await sendWithTypingDelay(
-          client,
-          session.chatId,
-          content.erros.faqNaoZero
-        );
-      }
-      break;
+  // Lógica para as opções válidas
+  if (userMessage === "3") {
+    let listaJogos = "";
+    for (const key in config.jogos) {
+      listaJogos += `*${key}.* ${config.jogos[key]}\n`;
+    }
+    const mensagemCompleta = `${content.faq.opcoes[userMessage]}\n\n${listaJogos}${content.instrucoesVoltarAoMenu}`;
+    await sendWithTypingDelay(client, session.chatId, mensagemCompleta);
+    session.stage = -2;
+  } else if (userMessage in content.faq.opcoes) {
+    await sendWithTypingDelay(
+      client,
+      session.chatId,
+      content.faq.opcoes[userMessage]
+    );
+    session.stage = -2;
+  } else if (userMessage === "7") {
+    session.stage = 0;
+    const serviceId = `OS-${uuidv4().substring(0, 8).toUpperCase()}`;
+    session.data.serviceId = serviceId;
+    await sendWithTypingDelay(client, session.chatId, content.saudacao.inicio);
+  } else if (userMessage === "8") {
+    await supabase.from("sessions").delete().eq("chatId", session.chatId);
+    await sendWithTypingDelay(
+      client,
+      session.chatId,
+      content.saudacao.finalizado
+    );
   }
 }
 
@@ -433,8 +402,35 @@ async function handleAttendantFlow(userMessage, session, supabase, client) {
   }
 }
 
+// Nova função principal para tratar todas as mensagens
+async function handleMessage(userMessage, session, supabase, client) {
+  // Trata comandos especiais primeiro, independentemente do estágio
+  if (userMessage === "9") {
+    await attendantFlowMap[9](userMessage, session, supabase, client);
+    return;
+  }
+
+  if (userMessage === "0") {
+    session.stage = -1;
+    session.data = {};
+    await sendWithTypingDelay(
+      client,
+      session.chatId,
+      content.saudacao.faqReiniciado + content.faq.menu
+    );
+    return;
+  }
+
+  // Direciona para o handler de FAQ ou para o fluxo de atendimento
+  if (session.stage < 0) {
+    await handleFaqMenu(userMessage, session, supabase, client);
+  } else {
+    await handleAttendantFlow(userMessage, session, supabase, client);
+  }
+}
+
 module.exports = {
-  handleInitialMessage,
   handleFaqMenu,
   handleAttendantFlow,
+  handleMessage,
 };
