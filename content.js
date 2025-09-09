@@ -6,56 +6,59 @@ module.exports = {
   instrucoesVoltarAoMenu,
   saudacao: {
     inicio:
-      "👋 Olá! Seja bem-vindo ao *CHATBOT DA HORA GAMES*! \n\nPara darmos início, me diga o seu *nome* e *sobrenome*?",
+      "👋 Olá! Seja bem-vindo(a) ao *CHATBOT DA HORA GAMES*! \n\nPara darmos início, me diga o seu *Nome* e *Sobrenome*?",
     reiniciado:
-      "🔄 Fluxo reiniciado! \n\n👋 Olá! Seja bem-vindo ao *CHATBOT DA HORA GAMES*! \n\nPara darmos início, me diga o seu *nome* e *sobrenome*?",
+      "🔄 Fluxo reiniciado! \n\n👋 Olá! Seja bem-vindo(a) ao *CHATBOT DA HORA GAMES*! \n\nPara darmos início, me diga o seu *Nome* e *Sobrenome*?",
     faqInicio:
-      "👋 Olá! Bem-vindo à *Da Hora Games*! \n\nPara iniciarmos, escolha uma das opções abaixo:\n",
+      "👋 Olá! Seja bem-vindo(a) ao *CHATBOT DA HORA GAMES*! \n\nPara iniciarmos, escolha uma das opções abaixo:\n",
     faqReiniciado:
-      "🔄 Fluxo reiniciado! \n\n👋 Olá! Bem-vindo à *Da Hora Games*! \n\nPara iniciarmos, escolha uma das opções abaixo:\n",
+      "🔄 Fluxo reiniciado! \n\n👋 👋 Olá! Seja bem-vindo(a) ao *CHATBOT DA HORA GAMES*! \n\nPara iniciarmos, escolha uma das opções abaixo:\n",
     finalizado: "🚫 Atendimento finalizado. Obrigado! 🙏",
     encerrado: "👋 Atendimento encerrado. Esperamos te ver em breve! 🙏",
     retorno: (nome) =>
-      `👋 Olá novamente, ${nome}! O que você gostaria de fazer?\n\n1️⃣ Ver resumo do último pedido\n2️⃣ Iniciar um novo pedido\n\n_(digite 9️⃣ para encerrar)_`,
+      `👋 Olá novamente, *${nome}!* O que gostaria de fazer?\n\n1️⃣ Ver resumo do último pedido\n2️⃣ Iniciar um novo pedido\n\n_(digite 9️⃣ para encerrar)_`,
     retornoAposResumo: `Você gostaria de:\n\n2️⃣ Iniciar um novo pedido\n9️⃣ Encerrar o atendimento`,
   },
   faq: {
     menu: `
 *🟢 Dúvidas sobre desbloqueio Xbox 360*
 
-1️⃣ ❓ O que é desbloqueio RGH 3.0?
-2️⃣ ⚙️ Requisitos
-3️⃣ 🎮 Lista de jogos
-4️⃣ 🌐 Posso jogar online?
-5️⃣ 🚚 Atendimento / Prazo
-6️⃣ 💰 Valor do serviço
+_1️⃣ ❓ O que é desbloqueio RGH 3.0?_
+_2️⃣ ⚙️ Requisitos_
+_3️⃣ 🎮 Lista de jogos_
+_4️⃣ 🌐 Posso jogar online?_
+_5️⃣ 🚚 Atendimento / Prazo_
+_6️⃣ 💰 Valor do serviço_
 
-*📌 Não tenho dúvidas e quero...:*
-7️⃣ Continuar para atendimento
-8️⃣ Encerrar atendimento
+*📌 Não tenho dúvidas e quero:*
+
+*7️⃣ Continuar para atendimento*
+_8️⃣ Encerrar atendimento_
 `,
     opcoes: {
-      1: `🔧 O desbloqueio RGH 3.0 permite rodar jogos direto do HD interno ou externo, sem precisar comprar jogos originais.
-Com ele você também pode:
+      1: `_🔧 O desbloqueio *RGH 3.0* permite rodar jogos direto do HD interno ou externo, sem precisar *comprar* jogos originais._
+
+*Com ele você também pode:*
 
 * Jogar emuladores
 * Instalar apps e homebrews
 * Personalizar o console
 * Aproveitar muito mais recursos!${instrucoesVoltarAoMenu}`,
-      2: `⚙️ Para fazer o desbloqueio, é necessário:
+      2: `_⚙️ Para fazer o desbloqueio, é necessário:_
 
 * Ter um Xbox 360 com fabricacão até 2014
 * Um HD interno, externo ou pendrive de pelo menos 32gb ou +
 
-⚠️ Sem armazenamento não é possível copiar e nem jogar os games.${instrucoesVoltarAoMenu}`,
-      3: "🎮 Aqui está minha lista de jogos:",
-      4: `🌐 Há possibilidade usando servidores furtivos (pesquise no Youtube). O Xbox perde o acesso a Xbox Live para evitar banimento da sua conta.
+_⚠️ Sem armazenamento não é possível copiar e nem jogar os games._${instrucoesVoltarAoMenu}`,
+      3: `_🎮 Aqui está minha lista de jogos:_`,
+      4: `_🌐 Há possibilidade usando servidores furtivos (pesquise no Youtube). O Xbox perde o acesso a Xbox Live para evitar banimento da sua conta._
 🚫 O desbloqueio é ideal para jogar offline e aproveitar jogos direto do HD.${instrucoesVoltarAoMenu}`,
-      5: `🚚 Não atendemos a domicílio.
+      5: `_🚚 Não atendemos a domicílio._
 📍 O cliente deve trazer o console no meu endereço.
 
 ⏱️ O prazo de entrega é em média 24 horas.${instrucoesVoltarAoMenu}`,
-      6: `💰 O desbloqueio RGH3 custa R$ 150,00.
+      6: `_💰 O desbloqueio RGH3 custa R$ 150,00._
+
 O valor já inclui:
 
 ✅ Limpeza interna
@@ -65,24 +68,25 @@ O valor já inclui:
   },
   pedidos: {
     nome: (nome) =>
-      `✅ Obrigado, ${nome}!\n\n📧 Agora, informe o seu *email*:\n\n${instrucoesReiniciarOuEncerrar}`,
+      `✅ Obrigado, *${nome}!*\n\n📧 Agora, informe o seu *email*:\n\n${instrucoesReiniciarOuEncerrar}`,
     email: `🏠 Informe o seu *endereço*:\n\n${instrucoesReiniciarOuEncerrar}`,
     endereco: `🎮 Qual o modelo do seu Xbox?\n\n1️⃣ Fat\n2️⃣ Slim\n3️⃣ Super Slim\n\n${instrucoesReiniciarOuEncerrar}`,
     ano: `📅 Informe o *ano* do console [2007 - 2015]:\n\n${instrucoesReiniciarOuEncerrar}`,
     armazenamento: `💾 Possui armazenamento?\n\n1️⃣ HD interno\n2️⃣ HD externo\n3️⃣ Pendrive 16GB+\n4️⃣ Não tenho\n\n${instrucoesReiniciarOuEncerrar}`,
     localizacao: `📍 Deseja receber o link da nossa localização?\n\n1️⃣ Sim\n2️⃣ Não\n\n${instrucoesReiniciarOuEncerrar}`,
     concluido: (nome) =>
-      `✅ Atendimento concluído! Obrigado, ${nome}, até breve! 🙏`,
+      `✅ Atendimento concluído! Obrigado, *${nome}*, até breve! 🙏`,
     avisoAno2015: `⚠️ Aparelhos de *2015 não podem ser desbloqueados definitivamente!*.\n\nDeseja continuar?\n\n1️⃣ Sim\n2️⃣ Não\n\n${instrucoesReiniciarOuEncerrar}`,
     avisoSemArmazenamento: `⚠️ Sem armazenamento não será possível jogar nem copiar jogos!\n\nO que você deseja:\n\n1️⃣ Continuar apenas com desbloqueio\n2️⃣ Finalizar\n\n${instrucoesReiniciarOuEncerrar}`,
     escolherJogos: (limiteJogos) =>
       `🎮 Escolha até *${limiteJogos} jogos* (digite os números separados por vírgula):`,
   },
   erros: {
-    emailInvalido:
-      "❌ Formato de email inválido. Por favor, digite um email válido.",
+    emailInvalido: `❌ Formato de email inválido! 
+      Por favor, digite um email válido.
+      Ex.: _seuemail@gmail.com_`,
     opcaoInvalida: (opcoes) => `❌ Opção inválida. Escolha:\n${opcoes}`,
-    anoInvalido: "❌ Ano inválido. Digite entre 2007 e 2015.",
+    anoInvalido: "❌ Ano inválido! Digite o ano de 2007 a 2015.",
     jogosInvalidos:
       "❌ Escolha no mínimo 1 e no máximo 15 jogos. Exemplo: 1,2,3",
     jogosNumerosInvalidos:
