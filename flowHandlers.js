@@ -388,7 +388,8 @@ async function handleFaqMenu(userMessage, session, supabase, client) {
       content.faq.opcoes[userMessage]
     );
     session.stage = -2;
-  } else if (userMessage === "7") {
+  } else if (userMessage === "8") {
+    // era 7
     session.stage = 0;
     const serviceId = `OS-${uuidv4().substring(0, 8).toUpperCase()}`;
     session.data.serviceId = serviceId;
@@ -406,7 +407,7 @@ async function handleFaqMenu(userMessage, session, supabase, client) {
         content.saudacao.inicio
       );
     }
-  } else if (userMessage === "8") {
+  } else if (userMessage === "9") {
     await supabase.from("sessions").delete().eq("chatId", session.chatId);
     await sendWithTypingDelay(
       client,

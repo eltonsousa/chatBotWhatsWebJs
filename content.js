@@ -28,12 +28,13 @@ _2️⃣ ⚙️ Requisitos_
 _3️⃣ 🎮 Lista de jogos_
 _4️⃣ 🌐 Posso jogar online?_
 _5️⃣ 🚚 Atendimento / Prazo_
-_6️⃣ 💰 Valor do serviço_
+_6️⃣ 🛠️ O meu Xbox é um 2015, dá para desbloquear?_
+_7️⃣ 💰 Valor do serviço_
 
 *📌 Não tenho dúvidas e quero:*
 
-*7️⃣ Continuar para atendimento*
-_8️⃣ Encerrar atendimento_
+*8️⃣ Continuar para atendimento*
+_9️⃣ Encerrar atendimento_
 `,
     opcoes: {
       1: `_🔧 O desbloqueio *RGH 3.0* permite rodar jogos direto do HD interno ou externo, sem precisar *comprar* jogos originais._
@@ -58,7 +59,9 @@ _⚠️ Sem armazenamento não é possível copiar e nem jogar os games._${instr
 📍 O cliente deve trazer o console no meu endereço.
 
 ⏱️ O prazo de entrega é em média 24 horas.${instrucoesVoltarAoMenu}`,
-      6: `_💰 O desbloqueio RGH3 custa R$ 150,00._
+      6: `🛠️ Os modelos fabricados a partir de 2015 não aceitam desbloqueio definitivo RGH 3.0.\n\n💾 Porém, existe um método alternativo via *Pendrive*, onde é necessário realizar um procedimento toda vez que ligar o Xbox.\nEstá em desenvolvimento mas é bastante utilizado.\n\n*⚠️ ATENÇÃO: ⚠️*\n_O mau uso pode danificar permanentemente seu Xbox._\n*USE POR SUA CONTA EM RISCO!!!*${instrucoesVoltarAoMenu}`,
+
+      7: `_💰 O desbloqueio RGH3 custa R$ 150,00._
 
 O valor já inclui:
 
@@ -97,7 +100,7 @@ Anos aceitos: [2007 - 2015]:\n\n${instrucoesReiniciarOuEncerrar}`,
     opcaoRetornoInvalida:
       "❌ Opção inválida. Escolha:\n\n1️⃣ Ver resumo\n2️⃣ Iniciar um novo pedido",
     opcaoFaqInvalida:
-      "❌ Opção inválida. Escolha entre 1️⃣ e 8️⃣ ou 0️⃣ para voltar.",
+      "❌ Opção inválida. Escolha entre 1️⃣ e 9️⃣, 8️⃣ para continuar, ou 0️⃣ para reiniciar o menu.",
     faqNaoZero: "❌ Por favor, digite 0️⃣ para voltar ao menu.",
   },
   opcoes: {
