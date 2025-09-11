@@ -1,3 +1,5 @@
+const { localizacao } = require("./config");
+const limiteJogos = parseInt(process.env.LIMITE_JOGOS);
 const instrucoesReiniciarOuEncerrar = `_(digite 0️⃣ para reiniciar, ou 9️⃣ para encerrar)_`;
 const instrucoesVoltarAoMenu = `\n\n_(digite 0️⃣ para voltar ao menu)_`;
 
@@ -21,15 +23,15 @@ module.exports = {
   },
   faq: {
     menu: `
-*🟢 Dúvidas sobre desbloqueio Xbox 360*
+*🟢 Dúvidas frequentes:*
 
 _1️⃣ ❓ O que é desbloqueio RGH 3.0?_
-_2️⃣ ⚙️ Requisitos_
-_3️⃣ 🎮 Lista de jogos_
+_2️⃣ ⚙️ O que é preciso para desbloquear?_
+_3️⃣ 🎮 Vc atende a domicílio? Quais são os jogos?_
 _4️⃣ 🌐 Posso jogar online?_
-_5️⃣ 🚚 Atendimento / Prazo_
+_5️⃣ 🚚 Onde fica? entrega na hora?_
 _6️⃣ 🛠️ O meu Xbox é um 2015, dá para desbloquear?_
-_7️⃣ 💰 Valor do serviço_
+_7️⃣ 💰 Quanto custa?_
 
 *📌 Não tenho dúvidas e quero:*
 
@@ -45,29 +47,26 @@ _9️⃣ Encerrar atendimento_
 * Instalar apps e homebrews
 * Personalizar o console
 * Aproveitar muito mais recursos!${instrucoesVoltarAoMenu}`,
-      2: `_⚙️ Para fazer o desbloqueio, é necessário:_
+      2: `*_⚙️ Para fazer o desbloqueio, é necessário:_*
 
 * Ter um Xbox 360 com fabricacão até 2014
 * Um HD interno, externo ou pendrive de pelo menos 32gb ou +
 
 _⚠️ Sem armazenamento não é possível copiar e nem jogar os games._${instrucoesVoltarAoMenu}`,
-      3: `_🎮 Aqui está minha lista de jogos:_`,
+      3: `*🚚 Não atendemos a domicílio!*\n\n📍 _O cliente deve trazer o console no meu endereço._\n\n🎮 _Aqui está minha lista de jogos:_`,
       4: `_🌐 Há possibilidade usando servidores furtivos (pesquise no Youtube). O Xbox perde o acesso a Xbox Live para evitar banimento da sua conta._
 🚫 O desbloqueio é ideal para jogar offline e aproveitar jogos direto do HD.${instrucoesVoltarAoMenu}`,
-      5: `*🚚 Não atendemos a domicílio.*
+      5: `📍 Estamos localizados na Rua Malvino Reis Neto\n(antiga São Miguel), 10 - Bairro Novo israel.
+Aqui está nossa localização:\n\n${localizacao}\n\n⏱️ O prazo de entrega é em média 24 horas.${instrucoesVoltarAoMenu}`,
+      6: `🛠️ Os modelos fabricados a partir de 2015 não aceitam desbloqueio definitivo RGH 3.0.\n\n💾 Porém, existe um método alternativo via *Pendrive*, onde é necessário realizar um procedimento toda vez que ligar o Xbox.\nEstá em desenvolvimento mas é bastante utilizado.\n\n*⚠️ ATENÇÃO: ⚠️*\n_O mau uso pode danificar permanentemente seu Xbox._\n_*USE POR SUA CONTA EM RISCO!!!*_${instrucoesVoltarAoMenu}`,
 
-📍 O cliente deve trazer o console no meu endereço.
-
-⏱️ O prazo de entrega é em média 24 horas.${instrucoesVoltarAoMenu}`,
-      6: `🛠️ Os modelos fabricados a partir de 2015 não aceitam desbloqueio definitivo RGH 3.0.\n\n💾 Porém, existe um método alternativo via *Pendrive*, onde é necessário realizar um procedimento toda vez que ligar o Xbox.\nEstá em desenvolvimento mas é bastante utilizado.\n\n*⚠️ ATENÇÃO: ⚠️*\n_O mau uso pode danificar permanentemente seu Xbox._\n*USE POR SUA CONTA EM RISCO!!!*${instrucoesVoltarAoMenu}`,
-
-      7: `_💰 O desbloqueio RGH3 custa R$ 150,00._
+      7: `_💰 O desbloqueio *RGH 3.0* custa *R$ 150,00*_
 
 O valor já inclui:
 
 ✅ Limpeza interna
 ✅ Troca da pasta térmica
-✅ Instalação de 15 jogos da minha lista${instrucoesVoltarAoMenu}`,
+✅ Instalação de *${limiteJogos}* jogos da minha lista${instrucoesVoltarAoMenu}`,
     },
   },
   pedidos: {
