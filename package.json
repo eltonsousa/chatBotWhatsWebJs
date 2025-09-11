@@ -1,6 +1,6 @@
 {
   "name": "chatbot-dahora-games",
-  "version": "1.0.1-beta3",
+  "version": "1.0.1-beta4",
   "description": "Chatbot automatizado para WhatsApp integrado com Supabase, desenvolvido para Da Hora Games.",
   "main": "index.js",
   "type": "commonjs",

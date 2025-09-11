@@ -7,6 +7,16 @@ const { sendWithTypingDelay, logInfo, logError } = require("./utils.js");
 // Mapa de handlers para cada estágio do fluxo de atendimento
 const attendantFlowMap = {
   0: async (userMessage, session, supabase, client) => {
+    // Nova lógica de validação de nome
+    const nomeRegex = /^[a-zA-ZáàâãéèêíïóôõöúçñÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑ\s'-]+$/;
+    if (!nomeRegex.test(userMessage.trim())) {
+      await sendWithTypingDelay(
+        client,
+        session.chatId,
+        "❌ Nome inválido. Por favor, digite seu nome e sobrenome usando apenas letras e espaços."
+      );
+      return; // Retorna sem avançar o estágio
+    }
     session.data.nome = userMessage;
     session.stage = 1;
     await sendWithTypingDelay(

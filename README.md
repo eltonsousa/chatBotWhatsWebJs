@@ -1,4 +1,4 @@
-# 🤖 Chatbot da Hora Games - versão: 1.0.1 - beta3
+# 🤖 Chatbot da Hora Games - versão: 1.0.1 - beta4
 
 Este projeto é um chatbot automatizado para WhatsApp, projetado para a loja Da Hora Games. Ele utiliza o
 **[whatsapp-web.js](https://github.com/pedroslopez/whatsapp-web.js)** para interagir com os usuários e o Supabase para gerenciar sessões e registrar pedidos de serviços, como desbloqueio de consoles e instalação de jogos.
