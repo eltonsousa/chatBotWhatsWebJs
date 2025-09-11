@@ -76,7 +76,7 @@ app.listen(PORT, () => {
   console.log(`🌍 Servidor rodando na porta ${PORT}`);
 });
 ////////////////////////////////////////////////////////////////////////////////
-
+const RATE_LIMIT_MS = 1000; // Limite de 1 segundo entre mensagens
 // Fluxo de mensagens
 client.on("message", async (msg) => {
   const chatId = msg.from;
@@ -91,16 +91,16 @@ client.on("message", async (msg) => {
 
   if (selectError && selectError.code !== "PGRST116") {
     logError("Erro ao buscar a sessão", selectError, session);
-    // Em caso de erro, evita processar a mensagem para não gerar mais erros
     return;
   }
 
-  // Se a sessão não existir, cria uma nova e envia o menu de boas-vindas completo
+  // Se a sessão não existir, cria uma nova
   if (!session) {
     session = {
       chatId: chatId,
       stage: -1,
       data: {},
+      lastMessageTimestamp: 0, // Inicializa o timestamp
     };
     await sendWithTypingDelay(
       client,
@@ -108,6 +108,17 @@ client.on("message", async (msg) => {
       content.saudacao.faqInicio + content.faq.menu
     );
   }
+
+  // Lógica de rate limiting usando o timestamp da sessão
+  const now = Date.now();
+  if (now - session.lastMessageTimestamp < RATE_LIMIT_MS) {
+    // Ignora a mensagem se for muito rápida
+    logInfo("Mensagem ignorada devido ao rate limiting", session);
+    return;
+  }
+
+  // Atualiza o timestamp da sessão para a mensagem atual
+  session.lastMessageTimestamp = now;
 
   // Delega o tratamento da mensagem para a função principal no flowHandlers
   await handleMessage(userMessage, session, supabase, client);
@@ -119,6 +130,12 @@ client.on("message", async (msg) => {
 
   if (upsertError) {
     logError("Erro ao salvar/atualizar a sessão:", upsertError, session);
+    // Adicionar mensagem amigável para o usuário
+    await sendWithTypingDelay(
+      client,
+      chatId,
+      "Desculpe, ocorreu um problema ao processar seu pedido. Por favor, tente novamente ou digite '9' para encerrar o atendimento."
+    );
   } else {
     logInfo("Sessão salva/atualizada com sucesso", session);
   }
