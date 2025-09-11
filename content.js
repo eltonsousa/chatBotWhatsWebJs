@@ -92,8 +92,8 @@ Anos aceitos: [2007 - 2015]:\n\n${instrucoesReiniciarOuEncerrar}`,
       Ex.:_seuemail@gmail.com_`,
     opcaoInvalida: (opcoes) => `❌ Opção inválida. Escolha:\n${opcoes}`,
     anoInvalido: "❌ Ano inválido! Digite o ano de 2007 a 2015.",
-    jogosInvalidos:
-      "❌ Escolha no mínimo 1 e no máximo 15 jogos. Exemplo: 1,2,3",
+    jogosInvalidos: (limiteJogos) =>
+      `❌ Escolha no mínimo 1 e no máximo *${limiteJogos} jogos*. Exemplo: 1,2,3`,
     jogosNumerosInvalidos:
       "❌ Um ou mais números de jogos são inválidos. Escolha entre:",
     simNaoInvalido: "❌ Opção inválida. Responda:\n\n1️⃣ Sim\n2️⃣ Não",

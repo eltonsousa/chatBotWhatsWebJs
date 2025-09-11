@@ -1,4 +1,5 @@
-// config.js
+require("dotenv").config();
+
 module.exports = {
   // Opções de jogos disponíveis
   jogos: {
@@ -30,5 +31,5 @@ module.exports = {
     26: "Super Street Fighter IV",
   },
   // Localização da loja
-  localizacao: "https://maps.app.goo.gl/QZCzcR531Lzan1LR8", // Substitua pela sua localização real!
+  localizacao: process.env.LOCALIZACAO_LOJA,
 };

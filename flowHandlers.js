@@ -2,6 +2,8 @@
 const { v4: uuidv4 } = require("uuid");
 const config = require("./config.js");
 const content = require("./content.js");
+require("dotenv").config();
+const limiteJogos = parseInt(process.env.LIMITE_JOGOS) || 15; // Garante que o valor seja um número, com 15 como padrão.
 const { sendWithTypingDelay, logInfo, logError } = require("./utils.js");
 
 // Mapa de handlers para cada estágio do fluxo de atendimento
@@ -133,7 +135,7 @@ const attendantFlowMap = {
     session.stage = 6;
 
     let listaJogos = "";
-    const limiteJogos = 15;
+    // const limiteJogos = 15;
     for (const key in config.jogos) {
       listaJogos += `${key}. ${config.jogos[key]}\n`;
     }
@@ -173,11 +175,14 @@ const attendantFlowMap = {
     // Remover duplicados
     numerosEscolhidos = [...new Set(numerosEscolhidos)];
 
-    if (numerosEscolhidos.length === 0 || numerosEscolhidos.length > 15) {
+    if (
+      numerosEscolhidos.length === 0 ||
+      numerosEscolhidos.length > limiteJogos
+    ) {
       await sendWithTypingDelay(
         client,
         session.chatId,
-        content.erros.jogosInvalidos
+        content.erros.jogosInvalidos(limiteJogos)
       );
       return;
     }
