@@ -1,4 +1,4 @@
-# 🤖 Chatbot da Hora Games - versão: 1.0.1 - beta4
+# 🤖 Chatbot da Hora Games - v.1.0.1-beta5-dev
 
 Este projeto é um chatbot automatizado para WhatsApp, projetado para a loja Da Hora Games. Ele utiliza o
 **[whatsapp-web.js](https://github.com/pedroslopez/whatsapp-web.js)** para interagir com os usuários e o Supabase para gerenciar sessões e registrar pedidos de serviços, como desbloqueio de consoles e instalação de jogos.
@@ -11,13 +11,14 @@ O sistema foi desenvolvido para a loja **Da Hora Games**, permitindo que cliente
 
 O chatbot oferece uma variedade de recursos para otimizar o atendimento ao cliente:
 
+- Atendimento humanizado, incluido opção de falar com atendente.
 - Atendimento Automatizado: Inicia e gerencia conversas com os clientes via WhatsApp.
 - FAQ Interativo: Permite que os usuários tirem dúvidas sobre o serviço de desbloqueio RGH 3.0 para Xbox 360, incluindo requisitos, valor e prazo.
 - Fluxo de Pedidos: Guia o cliente através de um processo passo a passo para coletar informações como nome, e-mail, endereço, modelo e ano do console.
 - Geração de QR Code: Facilita o login na web do WhatsApp.
 - Gerenciamento de Dados: Salva sessões e pedidos no Supabase.
 - Opções de Controle: O cliente pode reiniciar o fluxo (digitando 0) ou encerrar o atendimento (digitando 9) a qualquer momento.
-- Lista de Jogos: Apresenta uma lista de 26 jogos disponíveis para instalação.
+- Lista de Jogos: Apresenta uma lista de 28 jogos disponíveis para instalação.
 - Resumo do Pedido: Gera um resumo com um ID de serviço único para cada pedido.
 
 ---
