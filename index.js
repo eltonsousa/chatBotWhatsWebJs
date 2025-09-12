@@ -10,11 +10,9 @@ const { logInfo, logError, sendWithTypingDelay } = require("./utils.js");
 
 // Importação do arquivo de conteúdo
 const content = require("./content.js");
+const config = require("./config.js");
 // Handlers do fluxo de atendimento
 const { handleMessage } = require("./flowHandlers.js");
-
-// Garante que o valor seja um número, com 15 como padrão.
-const limiteJogos = parseInt(process.env.LIMITE_JOGOS) || 15;
 
 // Configura o cliente Supabase usando as variáveis de ambiente
 const supabaseUrl = process.env.SUPABASE_URL;
@@ -124,7 +122,13 @@ client.on("message", async (msg) => {
   session.lastMessageTimestamp = now;
 
   // Delega o tratamento da mensagem para a função principal no flowHandlers
-  await handleMessage(userMessage, session, supabase, client, limiteJogos);
+  await handleMessage(
+    userMessage,
+    session,
+    supabase,
+    client,
+    config.limiteJogos
+  );
 
   // Usa o upsert para inserir ou atualizar a sessão de forma segura
   const { error: upsertError } = await supabase

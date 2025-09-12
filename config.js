@@ -37,4 +37,7 @@ module.exports = {
 
   // Adicione seu número de celular para receber notificações do bot
   numeroAtendente: process.env.NUMERO_ATENDENTE,
+
+  // Garante que o valor seja um número, com 15 como padrão.
+  limiteJogos: parseInt(process.env.LIMITE_JOGOS) || 15,
 };
