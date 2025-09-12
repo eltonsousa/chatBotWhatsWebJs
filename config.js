@@ -1,4 +1,5 @@
-// config.js
+require("dotenv").config();
+
 module.exports = {
   // Opções de jogos disponíveis
   jogos: {
@@ -28,7 +29,12 @@ module.exports = {
     24: "Sonic & Sega All-Stars Racing",
     25: "Spider-Man: Shattered Dimensions",
     26: "Super Street Fighter IV",
+    27: "Emulador Super Nitendo",
+    28: "Black",
   },
   // Localização da loja
-  localizacao: "https://maps.app.goo.gl/QZCzcR531Lzan1LR8", // Substitua pela sua localização real!
+  localizacao: process.env.LOCALIZACAO_LOJA,
+
+  // Adicione seu número de celular para receber notificações do bot
+  numeroAtendente: process.env.NUMERO_ATENDENTE,
 };
