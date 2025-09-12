@@ -11,9 +11,8 @@ module.exports = {
     reiniciado:
       "🔄 Fluxo reiniciado! \n\n👋 Olá! Seja bem-vindo(a) ao *CHATBOT DA HORA GAMES*! \n\nPara darmos início, me diga o seu *Nome* e *Sobrenome*?",
     faqInicio:
-      "👋 Olá! Seja bem-vindo(a) ao *CHATBOT DA HORA GAMES*! \n\nPara iniciarmos, escolha uma das opções abaixo:\n",
-    faqReiniciado:
-      "🔄 Fluxo reiniciado! \n\n👋 Olá! Seja bem-vindo(a) ao *CHATBOT DA HORA GAMES*! \n\nPara iniciarmos, escolha uma das opções abaixo:\n",
+      "👋 Olá! Seja bem-vindo(a) ao *CHATBOT DA HORA GAMES*! \n\n*🟢 Dúvidas frequentes:*\n",
+    faqReiniciado: "🔄 Fluxo reiniciado! \n\n*🟢 Dúvidas frequentes:*\n",
     finalizado: "🚫 Atendimento finalizado. Obrigado! 🙏",
     encerrado: "👋 Atendimento encerrado. Esperamos te ver em breve! 🙏",
     retorno: (nome) =>
@@ -22,7 +21,7 @@ module.exports = {
   },
   faq: {
     menu: `
-*🟢 Dúvidas frequentes:*
+*Para iniciarmos, escolha uma das opções abaixo:*
 
 _1️⃣ ❓ O que é desbloqueio RGH 3.0?_
 _2️⃣ ⚙️ O que é preciso para desbloquear?_
