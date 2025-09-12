@@ -459,6 +459,35 @@ async function handleMessage(
   client,
   limiteJogos
 ) {
+  // Lógica para a opção de atendimento humano
+  if (userMessage === "*") {
+    // Altere o estágio da sessão para -3 (espera por atendimento humano)
+    session.stage = -3;
+    await sendWithTypingDelay(client, session.chatId, content.faq.opcoes["*"]);
+
+    // NOTIFICAÇÃO PARA O ATENDENTE HUMANO
+    const mensagemNotificacao = `⚠️ *Novo Atendimento Humano*\n\nO cliente *${session.data.nome}* solicitou atendimento humano.\n\nChatId: ${session.chatId}`;
+
+    try {
+      await client.sendMessage(config.numeroAtendente, mensagemNotificacao);
+      logInfo("Notificação de atendimento enviada com sucesso.", session);
+    } catch (error) {
+      logError(
+        "Erro ao enviar a notificação para o atendente:",
+        error,
+        session
+      );
+      // Você pode optar por não enviar uma mensagem ao cliente sobre a falha na notificação
+      // pois o atendimento humano já foi solicitado.
+    }
+
+    return;
+  }
+
+  // Se a sessão estiver no estágio de espera para atendimento humano (-3), o bot não responde
+  if (session.stage === -3 && userMessage !== "0" && userMessage !== "9") {
+    return;
+  }
   if (userMessage === "9") {
     await attendantFlowMap[9](userMessage, session, supabase, client);
     return;

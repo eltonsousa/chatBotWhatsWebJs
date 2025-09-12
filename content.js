@@ -33,8 +33,12 @@ _7️⃣ 💰 Quanto custa?_
 
 *📌 Não tenho dúvidas e quero:*
 
-*8️⃣ Continuar para atendimento*
+*_8️⃣ Continuar para atendimento_*
 _9️⃣ Encerrar atendimento_
+
+*Ou*
+
+_🗣️ Digite \* para falar com atendente_
 `,
     opcoes: {
       1: `_🔧 O desbloqueio *RGH 3.0* permite rodar jogos direto do HD interno ou externo, sem precisar *comprar* jogos originais._
@@ -66,6 +70,9 @@ O valor já inclui:
 ✅ Limpeza
 ✅ Troca da pasta térmica
 ✅ Instalação de *${limiteJogos}* jogos da minha lista${instrucoesVoltarAoMenu}`,
+
+      "*": `✅ Ok! Um atendente foi solicitado. Por favor, 
+aguarde que ele já irá te atender\n\nOu se preferir vc pode:\n\n_9️⃣ Encerrar atendimento_`,
     },
   },
   pedidos: {
