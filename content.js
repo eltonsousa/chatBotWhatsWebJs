@@ -21,7 +21,7 @@ module.exports = {
   },
   faq: {
     menu: `
-*Para iniciarmos, escolha uma das opções abaixo:*
+*Para iniciarmos, digite uma das opções abaixo:*
 
 _1️⃣ ❓ O que é desbloqueio RGH 3.0?_
 _2️⃣ ⚙️ O que é preciso para desbloquear?_
