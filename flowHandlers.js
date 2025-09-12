@@ -3,7 +3,7 @@ const { v4: uuidv4 } = require("uuid");
 const config = require("./config.js");
 const content = require("./content.js");
 require("dotenv").config();
-const limiteJogos = parseInt(process.env.LIMITE_JOGOS) || 15; // Garante que o valor seja um número, com 15 como padrão.
+
 const { sendWithTypingDelay, logInfo, logError } = require("./utils.js");
 
 // Mapa de handlers para cada estágio do fluxo de atendimento
@@ -105,7 +105,7 @@ const attendantFlowMap = {
       );
     }
   },
-  5: async (userMessage, session, supabase, client) => {
+  5: async (userMessage, session, supabase, client, limiteJogos) => {
     if (!["1", "2", "3", "4"].includes(userMessage)) {
       await sendWithTypingDelay(
         client,
@@ -135,7 +135,6 @@ const attendantFlowMap = {
     session.stage = 6;
 
     let listaJogos = "";
-    // const limiteJogos = 15;
     for (const key in config.jogos) {
       listaJogos += `${key}. ${config.jogos[key]}\n`;
     }
@@ -165,7 +164,7 @@ const attendantFlowMap = {
       );
     }
   },
-  6: async (userMessage, session, supabase, client) => {
+  6: async (userMessage, session, supabase, client, limiteJogos) => {
     const jogosOpcoes = config.jogos;
     let numerosEscolhidos = userMessage
       .split(",")
@@ -174,7 +173,7 @@ const attendantFlowMap = {
 
     // Remover duplicados
     numerosEscolhidos = [...new Set(numerosEscolhidos)];
-
+    // Logica para verificar a quantidade de Jogos escolhidos
     if (
       numerosEscolhidos.length === 0 ||
       numerosEscolhidos.length > limiteJogos
@@ -374,7 +373,13 @@ const attendantFlowMap = {
   },
 };
 
-async function handleFaqMenu(userMessage, session, supabase, client) {
+async function handleFaqMenu(
+  userMessage,
+  session,
+  supabase,
+  client,
+  limiteJogos
+) {
   const isValidFaqOption = ["1", "2", "3", "4", "5", "6", "7", "8"].includes(
     userMessage
   );
@@ -397,11 +402,13 @@ async function handleFaqMenu(userMessage, session, supabase, client) {
     await sendWithTypingDelay(client, session.chatId, mensagemCompleta);
     session.stage = -2;
   } else if (userMessage in content.faq.opcoes) {
-    await sendWithTypingDelay(
-      client,
-      session.chatId,
-      content.faq.opcoes[userMessage]
-    );
+    // Adicione a verificação para a opção 7, que agora é uma função
+    const responseContent =
+      userMessage === "7"
+        ? content.faq.opcoes[userMessage](limiteJogos)
+        : content.faq.opcoes[userMessage];
+
+    await sendWithTypingDelay(client, session.chatId, responseContent);
     session.stage = -2;
   } else if (userMessage === "8") {
     // era 7
@@ -432,14 +439,26 @@ async function handleFaqMenu(userMessage, session, supabase, client) {
   }
 }
 
-async function handleAttendantFlow(userMessage, session, supabase, client) {
+async function handleAttendantFlow(
+  userMessage,
+  session,
+  supabase,
+  client,
+  limiteJogos
+) {
   const handler = attendantFlowMap[session.stage];
   if (handler) {
-    await handler(userMessage, session, supabase, client);
+    await handler(userMessage, session, supabase, client, limiteJogos);
   }
 }
 
-async function handleMessage(userMessage, session, supabase, client) {
+async function handleMessage(
+  userMessage,
+  session,
+  supabase,
+  client,
+  limiteJogos
+) {
   if (userMessage === "9") {
     await attendantFlowMap[9](userMessage, session, supabase, client);
     return;
@@ -475,9 +494,15 @@ async function handleMessage(userMessage, session, supabase, client) {
   }
 
   if (session.stage < 0) {
-    await handleFaqMenu(userMessage, session, supabase, client);
+    await handleFaqMenu(userMessage, session, supabase, client, limiteJogos);
   } else {
-    await handleAttendantFlow(userMessage, session, supabase, client);
+    await handleAttendantFlow(
+      userMessage,
+      session,
+      supabase,
+      client,
+      limiteJogos
+    );
   }
 }
 

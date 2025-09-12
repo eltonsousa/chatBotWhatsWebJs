@@ -1,5 +1,4 @@
 const { localizacao } = require("./config");
-const limiteJogos = parseInt(process.env.LIMITE_JOGOS);
 const instrucoesReiniciarOuEncerrar = `_(digite 0️⃣ para reiniciar, ou 9️⃣ para encerrar)_`;
 const instrucoesVoltarAoMenu = `\n\n_(digite 0️⃣ para voltar ao menu)_`;
 
@@ -60,11 +59,12 @@ _⚠️ Sem armazenamento não é possível copiar e nem jogar os games._${instr
 Aqui está nossa localização:\n\n${localizacao}\n\n⏱️ O prazo de entrega é em média 24 horas.${instrucoesVoltarAoMenu}`,
       6: `🛠️ Os modelos fabricados a partir de 2015 não aceitam desbloqueio definitivo RGH 3.0.\n\n💾 Porém, existe um método alternativo via *Pendrive*, onde é necessário realizar um procedimento toda vez que ligar o Xbox.\nEstá em desenvolvimento mas é bastante utilizado.\n\n*⚠️ ATENÇÃO: ⚠️*\n_O mau uso pode danificar permanentemente seu Xbox._\n_*USE POR SUA CONTA EM RISCO!!!*_${instrucoesVoltarAoMenu}`,
 
-      7: `_💰 O desbloqueio *RGH 3.0* custa *R$ 150,00*_
+      7: (limiteJogos) =>
+        `_💰 O desbloqueio *RGH 3.0* custa *R$ 150,00*_
 
 O valor já inclui:
 
-✅ Limpeza interna
+✅ Limpeza
 ✅ Troca da pasta térmica
 ✅ Instalação de *${limiteJogos}* jogos da minha lista${instrucoesVoltarAoMenu}`,
     },
