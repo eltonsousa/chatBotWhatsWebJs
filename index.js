@@ -15,7 +15,7 @@ const crypto = require("crypto"); // se ainda não estiver importado
 const content = require("./content.js");
 const config = require("./config.js");
 // Handlers do fluxo de atendimento
-const { handleMessage } = require("./flowHandlers.js");
+const { handleMessage, handleFaqMenu } = require("./flowHandlers.js");
 
 // Configura o cliente Supabase usando as variáveis de ambiente
 const supabaseUrl = process.env.SUPABASE_URL;
@@ -85,8 +85,6 @@ const RATE_LIMIT_MS = 1000; // Limite de 1 segundo entre mensagens
 client.on("message", async (msg) => {
   const chatId = msg.from;
   const userMessage = msg.body.trim();
-
-  // Rate limiting
   const RATE_LIMIT_MS = 1000;
   const now = Date.now();
 
@@ -101,7 +99,6 @@ client.on("message", async (msg) => {
     return;
   }
 
-  // Atualiza timestamp para rate limiting
   if (
     session?.lastMessageTimestamp &&
     now - session.lastMessageTimestamp < RATE_LIMIT_MS
@@ -113,12 +110,13 @@ client.on("message", async (msg) => {
     });
     return;
   }
+
   if (!session) {
     session = { chatId, stage: -1, data: {}, lastMessageTimestamp: now };
   }
   session.lastMessageTimestamp = now;
 
-  // 🔹 Chamada da IA GEMINI se mensagem não for apenas números
+  // 🔹 Chamada da IA GEMINI
   if (!/^\d+$/.test(userMessage)) {
     try {
       const intencao = await classificarMensagemIA(userMessage);
@@ -130,14 +128,67 @@ client.on("message", async (msg) => {
       console.log("Intenção detectada:", intencao);
 
       if (intencao === "faq") {
-        await sendWithTypingDelay(
-          client,
-          chatId,
-          content.saudacao.faqInicio + content.faq.menu
-        );
-        session.stage = -1;
-        session.data = session.data || {};
-        await supabase.from("sessions").upsert(session);
+        const msgLower = userMessage.toLowerCase();
+
+        // 🔹 Mapa de palavras-chave para redirecionamento automático
+        const faqKeywordsMap = [
+          { op: "1", keywords: ["desbloqueio rgh", "rgh"] },
+          { op: "2", keywords: ["o que é preciso", "preciso desbloquear"] },
+          {
+            op: "3",
+            keywords: ["domicílio", "joga", "jogos", "atendimento em casa"],
+          },
+          { op: "4", keywords: ["online", "jogar online", "multiplayer"] },
+          {
+            op: "5",
+            keywords: [
+              "onde fica",
+              "loja",
+              "onde vc mora",
+              "onde voce mora",
+              "onde você mora",
+              "entrega",
+              "localização",
+            ],
+          },
+          { op: "6", keywords: ["2015", "meu xbox é 2015", "xbox 2015"] },
+          { op: "7", keywords: ["quanto custa", "preço", "quanto é"] },
+          {
+            op: "8",
+            keywords: ["continuar", "atendimento", "não tenho dúvidas"],
+          },
+        ];
+
+        let opcaoAutomatica = null;
+        for (const item of faqKeywordsMap) {
+          if (item.keywords.some((k) => msgLower.includes(k))) {
+            opcaoAutomatica = item.op;
+            break;
+          }
+        }
+
+        if (opcaoAutomatica) {
+          console.log(
+            "📌 Redirecionando automaticamente para a opção do FAQ:",
+            opcaoAutomatica
+          );
+          await handleFaqMenu(
+            opcaoAutomatica,
+            session,
+            supabase,
+            client,
+            config.limiteJogos
+          );
+        } else {
+          // Caso não encontre correspondência, mostra o menu completo
+          await sendWithTypingDelay(
+            client,
+            chatId,
+            content.saudacao.faqInicio + content.faq.menu
+          );
+          session.stage = -1;
+          await supabase.from("sessions").upsert(session);
+        }
         return;
       }
 
