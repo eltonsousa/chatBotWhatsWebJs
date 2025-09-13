@@ -5,25 +5,21 @@ const { Client, LocalAuth } = require("whatsapp-web.js");
 const { createClient } = require("@supabase/supabase-js");
 require("dotenv").config();
 
-// Funções utilitárias
+const crypto = require("crypto");
 const { logInfo, logError, sendWithTypingDelay } = require("./utils.js");
-// OpenAi
 const { classificarMensagemIA } = require("./intentAI.js");
-const crypto = require("crypto"); // se ainda não estiver importado
-
-// Importação do arquivo de conteúdo
+const { handleMessage, handleFaqMenu } = require("./flowHandlers.js");
 const content = require("./content.js");
 const config = require("./config.js");
-// Handlers do fluxo de atendimento
-const { handleMessage, handleFaqMenu } = require("./flowHandlers.js");
+const faqKeywordsMap = require("./faqKeywords.js");
 
-// Configura o cliente Supabase usando as variáveis de ambiente
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Configura Supabase
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
+);
 
-////////////////////////////////////////////////////////////////////////////////
-// Inicializa o cliente do WhatsApp
+// Inicializa cliente WhatsApp
 const client = new Client({
   authStrategy: new LocalAuth(),
   puppeteer: {
@@ -41,53 +37,50 @@ const client = new Client({
   },
 });
 
-// Log quando o bot estiver pronto
-client.on("ready", () => {
-  logInfo("🤖 CHATBOT está online!");
-});
+client.on("ready", () => logInfo("🤖 CHATBOT está online!"));
 
-// Rota para exibir QR Code
+// QR Code
 let latestQR = null;
 client.on("qr", (qr) => {
   latestQR = qr;
   console.log("⚡ Novo QR gerado. Acesse /qr para escanear.");
 });
 
-////////////////////////////////////////////////////////////////////////////////
-// Servidor Express
+// Express server
 const app = express();
-
-// rota de healthcheck
-app.get("/", (req, res) => {
-  res.send("OK");
-});
-
-// rota do QR Code
+app.get("/", (req, res) => res.send("OK"));
 app.get("/qr", async (req, res) => {
-  if (!latestQR) {
+  if (!latestQR)
     return res.send("Nenhum QR disponível. Aguarde o bot gerar um novo.");
-  }
   const qrImage = await QRCode.toDataURL(latestQR);
-  res.type("html");
-  res.send(
-    `<h2>Escaneie o QR Code abaixo com seu WhatsApp:</h2><br><img src="${qrImage}" />`
-  );
+  res
+    .type("html")
+    .send(
+      `<h2>Escaneie o QR Code abaixo com seu WhatsApp:</h2><br><img src="${qrImage}" />`
+    );
 });
-
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🌍 Servidor rodando na porta ${PORT}`);
-});
-////////////////////////////////////////////////////////////////////////////////
-const RATE_LIMIT_MS = 1000; // Limite de 1 segundo entre mensagens
+app.listen(PORT, () => console.log(`🌍 Servidor rodando na porta ${PORT}`));
 
-// Fluxo de mensagens
+// Função para encontrar a opção FAQ
+function encontrarOpcaoFAQ(msg) {
+  const msgLower = msg.toLowerCase();
+  for (const item of faqKeywordsMap) {
+    if (item.keywords.some((k) => msgLower.includes(k))) {
+      return item.op;
+    }
+  }
+  return null;
+}
+
+const RATE_LIMIT_MS = 1000;
+
 client.on("message", async (msg) => {
   const chatId = msg.from;
   const userMessage = msg.body.trim();
-  const RATE_LIMIT_MS = 1000;
   const now = Date.now();
 
+  // Busca sessão
   let { data: session, error: selectError } = await supabase
     .from("sessions")
     .select("*")
@@ -99,10 +92,12 @@ client.on("message", async (msg) => {
     return;
   }
 
-  if (
-    session?.lastMessageTimestamp &&
-    now - session.lastMessageTimestamp < RATE_LIMIT_MS
-  ) {
+  if (!session) {
+    session = { chatId, stage: -1, data: {}, lastMessageTimestamp: 0 };
+  }
+
+  // Rate limiting
+  if (now - (session.lastMessageTimestamp || 0) < RATE_LIMIT_MS) {
     logInfo("Mensagem ignorada devido ao rate limiting", {
       chatId,
       userMessage,
@@ -110,62 +105,20 @@ client.on("message", async (msg) => {
     });
     return;
   }
-
-  if (!session) {
-    session = { chatId, stage: -1, data: {}, lastMessageTimestamp: now };
-  }
   session.lastMessageTimestamp = now;
 
-  // 🔹 Chamada da IA GEMINI
-  if (!/^\d+$/.test(userMessage)) {
+  // 🔹 IA Gemini - só se a sessão estiver fora do fluxo de cadastro (stage < 0)
+  if (!/^\d+$/.test(userMessage) && session.stage < 0) {
     try {
       const intencao = await classificarMensagemIA(userMessage);
 
-      // LOG detalhado
       console.log("🧠 IA ativada!");
       console.log("ChatId:", chatId);
       console.log("Mensagem do usuário:", userMessage);
       console.log("Intenção detectada:", intencao);
 
       if (intencao === "faq") {
-        const msgLower = userMessage.toLowerCase();
-
-        // 🔹 Mapa de palavras-chave para redirecionamento automático
-        const faqKeywordsMap = [
-          { op: "1", keywords: ["desbloqueio rgh", "rgh"] },
-          { op: "2", keywords: ["o que é preciso", "preciso desbloquear"] },
-          {
-            op: "3",
-            keywords: ["domicílio", "joga", "jogos", "atendimento em casa"],
-          },
-          { op: "4", keywords: ["online", "jogar online", "multiplayer"] },
-          {
-            op: "5",
-            keywords: [
-              "onde fica",
-              "loja",
-              "onde vc mora",
-              "onde voce mora",
-              "onde você mora",
-              "entrega",
-              "localização",
-            ],
-          },
-          { op: "6", keywords: ["2015", "meu xbox é 2015", "xbox 2015"] },
-          { op: "7", keywords: ["quanto custa", "preço", "quanto é"] },
-          {
-            op: "8",
-            keywords: ["continuar", "atendimento", "não tenho dúvidas"],
-          },
-        ];
-
-        let opcaoAutomatica = null;
-        for (const item of faqKeywordsMap) {
-          if (item.keywords.some((k) => msgLower.includes(k))) {
-            opcaoAutomatica = item.op;
-            break;
-          }
-        }
+        const opcaoAutomatica = encontrarOpcaoFAQ(userMessage);
 
         if (opcaoAutomatica) {
           console.log(
@@ -180,7 +133,6 @@ client.on("message", async (msg) => {
             config.limiteJogos
           );
         } else {
-          // Caso não encontre correspondência, mostra o menu completo
           await sendWithTypingDelay(
             client,
             chatId,
@@ -208,7 +160,7 @@ client.on("message", async (msg) => {
     }
   }
 
-  // Continua para o fluxo normal
+  // Fluxo normal
   await handleMessage(
     userMessage,
     session,
@@ -217,7 +169,7 @@ client.on("message", async (msg) => {
     config.limiteJogos
   );
 
-  // Salva/atualiza a sessão
+  // Salva sessão
   const { error: upsertError } = await supabase
     .from("sessions")
     .upsert(session);
