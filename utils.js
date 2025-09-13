@@ -1,4 +1,3 @@
-// utils.js
 // Logs personalizados
 function logInfo(message, session) {
   const nome = session?.data?.nome || "Usuário desconhecido";
@@ -23,11 +22,6 @@ async function sendWithTypingDelay(client, chatId, message, delayMs = 1500) {
   await client.sendMessage(chatId, message);
 }
 
-/**
- * Ordena a lista de jogos e a formata como uma string numerada.
- * @param {string[]} jogosArray O array de jogos do arquivo de configuração.
- * @returns {string} A lista de jogos formatada para exibição.
- */
 function formatarListaDeJogos(jogosArray) {
   // Cria uma cópia do array e o ordena em ordem alfabética
   const jogosOrdenados = [...jogosArray].sort((a, b) => a.localeCompare(b));
