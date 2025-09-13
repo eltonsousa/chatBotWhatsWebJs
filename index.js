@@ -7,6 +7,9 @@ require("dotenv").config();
 
 // Funções utilitárias
 const { logInfo, logError, sendWithTypingDelay } = require("./utils.js");
+// OpenAi
+const { classificarMensagemIA } = require("./intentAI.js");
+const crypto = require("crypto"); // se ainda não estiver importado
 
 // Importação do arquivo de conteúdo
 const content = require("./content.js");
@@ -83,7 +86,10 @@ client.on("message", async (msg) => {
   const chatId = msg.from;
   const userMessage = msg.body.trim();
 
-  // Busca a sessão do usuário no Supabase
+  // Rate limiting
+  const RATE_LIMIT_MS = 1000;
+  const now = Date.now();
+
   let { data: session, error: selectError } = await supabase
     .from("sessions")
     .select("*")
@@ -91,37 +97,67 @@ client.on("message", async (msg) => {
     .single();
 
   if (selectError && selectError.code !== "PGRST116") {
-    logError("Erro ao buscar a sessão", selectError, session);
+    logError("Erro ao buscar a sessão", selectError, { chatId, userMessage });
     return;
   }
 
-  // Se a sessão não existir, cria uma nova
-  if (!session) {
-    session = {
-      chatId: chatId,
-      stage: -1,
-      data: {},
-      lastMessageTimestamp: 0, // Inicializa o timestamp
-    };
-    await sendWithTypingDelay(
-      client,
+  // Atualiza timestamp para rate limiting
+  if (
+    session?.lastMessageTimestamp &&
+    now - session.lastMessageTimestamp < RATE_LIMIT_MS
+  ) {
+    logInfo("Mensagem ignorada devido ao rate limiting", {
       chatId,
-      content.saudacao.faqInicio + content.faq.menu
-    );
-  }
-
-  // Lógica de rate limiting usando o timestamp da sessão
-  const now = Date.now();
-  if (now - session.lastMessageTimestamp < RATE_LIMIT_MS) {
-    // Ignora a mensagem se for muito rápida
-    logInfo("Mensagem ignorada devido ao rate limiting", session);
+      userMessage,
+      session,
+    });
     return;
   }
-
-  // Atualiza o timestamp da sessão para a mensagem atual
+  if (!session) {
+    session = { chatId, stage: -1, data: {}, lastMessageTimestamp: now };
+  }
   session.lastMessageTimestamp = now;
 
-  // Delega o tratamento da mensagem para a função principal no flowHandlers
+  // 🔹 Chamada da IA GEMINI se mensagem não for apenas números
+  if (!/^\d+$/.test(userMessage)) {
+    try {
+      const intencao = await classificarMensagemIA(userMessage);
+
+      // LOG detalhado
+      console.log("🧠 IA ativada!");
+      console.log("ChatId:", chatId);
+      console.log("Mensagem do usuário:", userMessage);
+      console.log("Intenção detectada:", intencao);
+
+      if (intencao === "faq") {
+        await sendWithTypingDelay(
+          client,
+          chatId,
+          content.saudacao.faqInicio + content.faq.menu
+        );
+        session.stage = -1;
+        session.data = session.data || {};
+        await supabase.from("sessions").upsert(session);
+        return;
+      }
+
+      if (intencao === "cadastro") {
+        const serviceId = `OS-${crypto
+          .randomUUID()
+          .substring(0, 8)
+          .toUpperCase()}`;
+        session.stage = 0;
+        session.data = { ...session.data, serviceId };
+        await supabase.from("sessions").upsert(session);
+        await sendWithTypingDelay(client, chatId, content.saudacao.inicio);
+        return;
+      }
+    } catch (err) {
+      console.error("⚠️ Erro ao classificar mensagem com Gemini:", err);
+    }
+  }
+
+  // Continua para o fluxo normal
   await handleMessage(
     userMessage,
     session,
@@ -130,21 +166,27 @@ client.on("message", async (msg) => {
     config.limiteJogos
   );
 
-  // Usa o upsert para inserir ou atualizar a sessão de forma segura
+  // Salva/atualiza a sessão
   const { error: upsertError } = await supabase
     .from("sessions")
     .upsert(session);
-
   if (upsertError) {
-    logError("Erro ao salvar/atualizar a sessão:", upsertError, session);
-    // Adicionar mensagem amigável para o usuário
+    logError("Erro ao salvar/atualizar a sessão:", upsertError, {
+      chatId,
+      userMessage,
+      session,
+    });
     await sendWithTypingDelay(
       client,
       chatId,
       "Desculpe, ocorreu um problema ao processar seu pedido. Por favor, tente novamente ou digite '9' para encerrar o atendimento."
     );
   } else {
-    logInfo("Sessão salva/atualizada com sucesso", session);
+    logInfo("Sessão salva/atualizada com sucesso", {
+      chatId,
+      userMessage,
+      session,
+    });
   }
 });
 
