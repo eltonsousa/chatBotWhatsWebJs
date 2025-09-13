@@ -23,8 +23,24 @@ async function sendWithTypingDelay(client, chatId, message, delayMs = 1500) {
   await client.sendMessage(chatId, message);
 }
 
+/**
+ * Ordena a lista de jogos e a formata como uma string numerada.
+ * @param {string[]} jogosArray O array de jogos do arquivo de configuração.
+ * @returns {string} A lista de jogos formatada para exibição.
+ */
+function formatarListaDeJogos(jogosArray) {
+  // Cria uma cópia do array e o ordena em ordem alfabética
+  const jogosOrdenados = [...jogosArray].sort((a, b) => a.localeCompare(b));
+
+  // Mapeia o array ordenado para uma string com numeração (1., 2., 3., etc.)
+  return jogosOrdenados
+    .map((jogo, index) => `${index + 1}. ${jogo}`)
+    .join("\n");
+}
+
 module.exports = {
   logInfo,
   logError,
   sendWithTypingDelay,
+  formatarListaDeJogos,
 };

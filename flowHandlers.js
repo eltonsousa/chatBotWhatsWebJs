@@ -4,7 +4,13 @@ const config = require("./config.js");
 const content = require("./content.js");
 require("dotenv").config();
 
-const { sendWithTypingDelay, logInfo, logError } = require("./utils.js");
+// A nova função 'formatarListaDeJogos' foi adicionada aqui
+const {
+  sendWithTypingDelay,
+  logInfo,
+  logError,
+  formatarListaDeJogos,
+} = require("./utils.js");
 
 // Mapa de handlers para cada estágio do fluxo de atendimento
 const attendantFlowMap = {
@@ -134,14 +140,12 @@ const attendantFlowMap = {
         : "Pendrive 16GB+";
     session.stage = 6;
 
-    let listaJogos = "";
-    for (const key in config.jogos) {
-      listaJogos += `${key}. ${config.jogos[key]}\n`;
-    }
+    // Agora a lista de jogos é gerada dinamicamente
+    const listaJogos = formatarListaDeJogos(config.jogos);
     await sendWithTypingDelay(
       client,
       session.chatId,
-      `${content.pedidos.escolherJogos(limiteJogos)}\n${listaJogos}${
+      `${content.pedidos.escolherJogos(limiteJogos)}\n\n${listaJogos}\n\n${
         content.instrucoesReiniciarOuEncerrar
       }`
     );
@@ -165,19 +169,16 @@ const attendantFlowMap = {
     }
   },
   6: async (userMessage, session, supabase, client, limiteJogos) => {
-    const jogosOpcoes = config.jogos;
-    let numerosEscolhidos = userMessage
+    // A validação agora é feita em relação ao array
+    const numerosEscolhidos = userMessage
       .split(",")
-      .map((n) => n.trim())
-      .filter((n) => n !== "");
+      .map((n) => parseInt(n.trim(), 10))
+      .filter((n) => !isNaN(n) && n > 0 && n <= config.jogos.length);
 
     // Remover duplicados
-    numerosEscolhidos = [...new Set(numerosEscolhidos)];
-    // Logica para verificar a quantidade de Jogos escolhidos
-    if (
-      numerosEscolhidos.length === 0 ||
-      numerosEscolhidos.length > limiteJogos
-    ) {
+    const numerosUnicos = [...new Set(numerosEscolhidos)];
+
+    if (numerosUnicos.length === 0 || numerosUnicos.length > limiteJogos) {
       await sendWithTypingDelay(
         client,
         session.chatId,
@@ -186,19 +187,10 @@ const attendantFlowMap = {
       return;
     }
 
-    const todosValidos = numerosEscolhidos.every((n) => jogosOpcoes[n]);
-    if (!todosValidos) {
-      await sendWithTypingDelay(
-        client,
-        session.chatId,
-        `${content.erros.jogosNumerosInvalidos} ${Object.keys(jogosOpcoes).join(
-          ", "
-        )}.`
-      );
-      return;
-    }
+    // Ordena os jogos do config para que os índices do array correspondam
+    const jogosOrdenados = [...config.jogos].sort((a, b) => a.localeCompare(b));
+    const jogosSelecionados = numerosUnicos.map((n) => jogosOrdenados[n - 1]);
 
-    let jogosSelecionados = numerosEscolhidos.map((n) => jogosOpcoes[n]);
     session.data.jogos = jogosSelecionados;
     session.stage = 7;
     await sendWithTypingDelay(
@@ -393,11 +385,10 @@ async function handleFaqMenu(
     return;
   }
 
+  // Lógica para a opção 3
   if (userMessage === "3") {
-    let listaJogos = "";
-    for (const key in config.jogos) {
-      listaJogos += `*${key}.* ${config.jogos[key]}\n`;
-    }
+    // A lista de jogos agora é gerada dinamicamente
+    const listaJogos = formatarListaDeJogos(config.jogos);
     const mensagemCompleta = `${content.faq.opcoes[userMessage]}\n\n${listaJogos}${content.instrucoesVoltarAoMenu}`;
     await sendWithTypingDelay(client, session.chatId, mensagemCompleta);
     session.stage = -2;
@@ -466,6 +457,7 @@ async function handleMessage(
     await sendWithTypingDelay(client, session.chatId, content.faq.opcoes["*"]);
 
     // NOTIFICAÇÃO PARA O ATENDENTE HUMANO
+    logInfo("Cliente solicitou atendimento humano", session);
     const mensagemNotificacao = `⚠️ *Novo Atendimento Humano*\n\nO cliente *${session.data.nome}* solicitou atendimento humano.\n\nChatId: ${session.chatId}`;
 
     try {
@@ -486,6 +478,7 @@ async function handleMessage(
 
   // Se a sessão estiver no estágio de espera para atendimento humano (-3), o bot não responde
   if (session.stage === -3 && userMessage !== "0" && userMessage !== "9") {
+    logInfo("Cliente em espera, Bot não responde", session);
     return;
   }
   if (userMessage === "9") {

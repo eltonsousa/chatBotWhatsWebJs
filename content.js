@@ -89,7 +89,7 @@ Anos aceitos: [2007 - 2015]:\n\n${instrucoesReiniciarOuEncerrar}`,
     avisoAno2015: `⚠️ Aparelhos de *2015 não podem ser desbloqueados definitivamente!*.\n\nDeseja continuar?\n\n1️⃣ Sim\n2️⃣ Não\n\n${instrucoesReiniciarOuEncerrar}`,
     avisoSemArmazenamento: `⚠️ Sem armazenamento não será possível jogar nem copiar jogos!\n\nO que você deseja:\n\n1️⃣ Continuar apenas com desbloqueio\n2️⃣ Finalizar\n\n${instrucoesReiniciarOuEncerrar}`,
     escolherJogos: (limiteJogos) =>
-      `🎮 Escolha até *${limiteJogos} jogos* (digite os números separados por vírgula):`,
+      `🎮 Escolha até *${limiteJogos} jogos*\n(digite os números separados por vírgula):`,
   },
   erros: {
     emailInvalido: `❌ Formato de email inválido! 
