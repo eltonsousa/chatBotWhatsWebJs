@@ -1,125 +1,70 @@
-# 🤖 Chatbot da Hora Games - v.1.0.1-beta5-dev
+### ChatBot Da Hora Games
 
-Este projeto é um chatbot automatizado para WhatsApp, projetado para a loja Da Hora Games. Ele utiliza o
-**[whatsapp-web.js](https://github.com/pedroslopez/whatsapp-web.js)** para interagir com os usuários e o Supabase para gerenciar sessões e registrar pedidos de serviços, como desbloqueio de consoles e instalação de jogos.
+Chatbot inteligente para WhatsApp, com integração de IA para classificação de mensagens, fluxo de atendimento automatizado e armazenamento de pedidos no Supabase.
 
-O sistema foi desenvolvido para a loja **Da Hora Games**, permitindo que clientes iniciem atendimentos, solicitem serviços de desbloqueio, instalação de jogos e recebam informações personalizadas.
-
----
-
-## 🚀 Funcionalidades
-
-O chatbot oferece uma variedade de recursos para otimizar o atendimento ao cliente:
-
-- Atendimento humano: incluido opção de falar com atendente.
-- Atendimento Automatizado: Inicia e gerencia conversas com os clientes via WhatsApp.
-- FAQ Interativo: Permite que os usuários tirem dúvidas sobre o serviço de desbloqueio RGH 3.0 para Xbox 360, incluindo requisitos, valor e prazo.
-- Fluxo de Pedidos: Guia o cliente através de um processo passo a passo para coletar informações como nome, e-mail, endereço, modelo e ano do console.
-- Geração de QR Code: Facilita o login na web do WhatsApp.
-- Gerenciamento de Dados: Salva sessões e pedidos no Supabase.
-- Opções de Controle: O cliente pode reiniciar o fluxo (digitando 0) ou encerrar o atendimento (digitando 9) a qualquer momento.
-- Lista de Jogos: Apresenta uma lista de 26 jogos disponíveis para instalação.
-- Resumo do Pedido: Gera um resumo com um ID de serviço único para cada pedido.
+- 🚀 Funcionalidades
+- 🤖 IA Gemini: Classifica mensagens automaticamente e direciona o atendimento.
+- 📱 WhatsApp Web.js: Comunicação 100% via WhatsApp, com QR Code para autenticação rápida.
+- 📋 Pedidos e IDs únicos: Cada interação ou pedido é salvo com ID único no Supabase.
+- 🎮 Gestão de jogos: Lista de jogos dinâmica, validada e configurável.
+- ⚡ Logs detalhados: Informação completa de chatId, usuário e estágios do atendimento.
+- 🐞 Correção de bugs: Melhorias no fluxo, mensagens de saudação e FAQ antes do fluxo principal.
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
-
-Este projeto foi construído com as seguintes tecnologias:
-
-- Node.js
-- Express
-- whatsapp-web.js
-- Supabase
-- Docker
-- Railway
-
----
-
-## ⚙️ Pré-requisitos
-
-Para rodar o projeto, você precisa ter instalado:
-
-- Node.js 20+
-- Docker (opcional, para rodar em container)
-- Conta no Railway ou no Supabase.
-
----
-
-## ▶️ Executando localmente
+## ⚙️ Instalação
 
 Clone o repositório:
 
 ```bash
-git clone https://github.com/seu-usuario/chatbot-hora-games.git
-cd chatbot-hora-games
-Instale as dependências:
+git clone https://github.com/seu-usuario/chatbot-whatsapp.git
+cd chatbot-whatsapp
 ```
+
+Instale dependências:
 
 ```bash
 npm install
-Execute o projeto:
 ```
 
+Inicie o bot:
+
 ```bash
-npm start
-Rotas Locais
-http://localhost:3000/: Rota de healthcheck.
-http://localhost:3000/qr: Exibe o QR Code para login no WhatsApp.
+node index.js
+```
+
+Acesse o QR Code:
+
+http://localhost:3000/qr
+
+---
+
+## 🗂 Estrutura do Projeto
+
+```bash
+├─ index.js # Arquivo principal
+├─ config.js # Configurações do bot e jogos
+├─ flowHandlers.js # Fluxo de atendimento
+├─ intentAI.js # Classificação de mensagens pela IA
+├─ utils.js # Funções auxiliares e logs
+├─ content.js # Conteúdos fixos do bot
+└─ package.json # Dependências e scripts
 ```
 
 ---
 
-## 🐳 Rodando com Docker
+## 🏷 Versionamento
 
-Se preferir usar Docker, o projeto já está configurado.
+Usamos tags Git para controlar releases:
 
-Construa a imagem Docker:
-
-```bash
-docker build -t chatbot-hora-games .
-Execute o container:
-```
-
-```bash
-docker run -p 3000:3000 --env-file .env chatbot-hora-games
-```
+- v1.0.1-beta7-dev – Versão beta com IA Gemini e integração completa.
 
 ---
 
-## 🚀 Deploy no Railway
+## 🛠 Próximos Passos:
 
-O projeto inclui arquivos Dockerfile e railway.json para facilitar o deploy.
-
-Inicialize o Git e faça o commit inicial:
-
-```bash
-git init
-git add .
-git commit -m "Initial deploy"
-Suba para o Railway:
-railway up
-```
-
----
-
-## 📋 Estrutura do Projeto
-
-A estrutura do projeto é a seguinte:
-
-- index.js: Arquivo principal que inicializa o chatbot e o servidor Express.
-- config.js: Contém a lista de jogos disponíveis e a localização da loja.
-- content.js: Gerencia as mensagens e fluxos de conversa do bot.
-- flowHandlers.js: Trata a lógica de cada etapa do fluxo de atendimento.
-- utils.js: Inclui funções utilitárias para logs e envio de mensagens.
-- package.json: Lista as dependências e scripts do projeto.
-- Dockerfile: Configura o container para o ambiente de execução.
-- railway.json: Define as configurações de build para o Railway.
-- .gitignore: Ignora arquivos e pastas que não devem ser versionados, como node_modules e .env.
-
-## 👨‍💻 Autor
-
-Elton Sousa
-Email: eltonsousadesigner@gmail.com
+- Integração com mais fluxos de atendimento
+- Melhorias na resposta automática de FAQ
+- Monitoramento em tempo real de pedidos e usuários
 
 ---
