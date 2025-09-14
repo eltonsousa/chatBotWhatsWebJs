@@ -77,13 +77,23 @@ module.exports = [
     ],
   },
   {
-    op: "8", // Continuar para atendimento
+    op: "8", // Continuar para cadastro
     keywords: [
       "continuar",
-      "atendimento",
-      "quero atendimento",
       "começar",
       "iniciar cadastro",
+      "quero fazer debloqueio",
+      "quero debloqueio",
+      "quero debloquear meu xbox",
+    ],
+  },
+  {
+    op: "*", // Continuar para atendimento
+    keywords: [
+      "atendimento",
+      "quero atendimento",
+      "falar com atendente",
+      "atendente",
     ],
   },
 ];
